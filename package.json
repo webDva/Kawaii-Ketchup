@@ -1,0 +1,8 @@
+{
+    "name": "Ketchup_and_Raisins",
+    "version": "1.0.0",
+    "keywords": ["util", "functional", "server", "client", "browser"],
+    "author": "jeast",
+    "contributors": [],
+    "dependencies": {}
+}
