@@ -38,11 +38,23 @@ module GameModuleName {
         preload() {
             // Display the loading screen image
             // Load assets
+
+            // test square graphic
+            let playerSquare = this.game.add.bitmapData(100, 100);
+            playerSquare.rect(0, 0, 100, 100, 'rgb(255, 192, 203)');
+            this.game.cache.addBitmapData('player', playerSquare);
         }
 
         create() {
             this.game.state.start("GameState");
         }
+    }
+
+    // enum for movement directions
+    export enum Movement {
+        Left,
+        Right,
+        Jump
     }
 
     /*
@@ -51,14 +63,73 @@ module GameModuleName {
     export class GameState extends Phaser.State {
         game: Phaser.Game;
 
+        player: Phaser.Sprite;
+
+        // keyboard cursor key controls
+        cursors: Phaser.CursorKeys;
+
+        static MOVE_VELOCITY: number = 365;
+        static JUMP_VELOCITY: number = GameState.MOVE_VELOCITY + GameState.MOVE_VELOCITY * 0.38;
+
         constructor() {
             super();
         }
 
         create() {
+            this.game.physics.startSystem(Phaser.Physics.ARCADE);
+            //this.game.physics.arcade.gravity.x = -400;            
+
+            // add cursor keys controls
+            this.cursors = this.game.input.keyboard.createCursorKeys();
+
+            this.player = this.game.add.sprite(100, this.game.world.centerY, this.game.cache.getBitmapData('player'));
+            this.game.physics.arcade.enable(this.player);
+            this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
+            this.player.body.collideWorldBounds = true;
+        }
+
+        /*
+         * controls player horizontal movement
+         */
+        movePlayer(direction: GameModuleName.Movement) {
+            // The player's avatar's physics body will be disabled if they touch the lava hazards, so stop
+            // controlling their movement if they're dead.
+            if (!this.player.body.enable) {
+                return;
+            }
+
+            // If the player is in mid-air, decrease their movement speed by 10%.
+            let speedModifier = 0;
+            if (!this.player.body.onFloor()) {
+                speedModifier = 0.10 * GameState.MOVE_VELOCITY;
+            }
+
+            if (direction === GameModuleName.Movement.Left) {
+                this.player.body.velocity.x = -GameState.MOVE_VELOCITY - speedModifier;
+            } else if (direction === GameModuleName.Movement.Right) {
+                this.player.body.velocity.x = GameState.MOVE_VELOCITY - speedModifier;
+            } else if (direction === GameModuleName.Movement.Jump) {
+                // checks to see if the player is on the ground, then jumps and plays jumping sound
+                if (this.player.body.onFloor()) {
+                    this.player.body.velocity.y = -GameState.JUMP_VELOCITY;
+                }
+            }
         }
 
         update() {
+            // reset the player's avatar's velocity so it won't move forever
+            this.player.body.velocity.x = 0;
+
+            // processing cursor keys or onscreen controls input to move the player avatar
+            if (this.cursors.left.isDown) {
+                this.movePlayer(GameModuleName.Movement.Left);
+            }
+            else if (this.cursors.right.isDown) {
+                this.movePlayer(GameModuleName.Movement.Right);
+            }
+            if (this.cursors.up.isDown) {
+                this.movePlayer(GameModuleName.Movement.Jump);
+            }
         }
     }
 
