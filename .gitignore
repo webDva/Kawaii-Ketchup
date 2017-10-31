@@ -1,0 +1,8 @@
+/node_modules/
+/public_html/typescript/phaser.d.ts
+/public_html/typescript/p2.d.ts
+/public_html/typescript/pixi.d.ts
+/public_html/game.js
+/public_html/phaser.js
+nbproject/
+test/
