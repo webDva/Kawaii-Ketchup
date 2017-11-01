@@ -40,13 +40,13 @@ module GameModuleName {
             // Load assets
 
             // test square graphic
-            let playerSquare = this.game.add.bitmapData(100, 100);
-            playerSquare.rect(0, 0, 100, 100, 'rgb(255, 192, 203)');
+            let playerSquare = this.game.add.bitmapData(64, 64);
+            playerSquare.rect(0, 0, 64, 64, 'rgb(255, 192, 203)');
             this.game.cache.addBitmapData('player', playerSquare);
 
             // test missile graphic
-            let missileSquare = this.game.add.bitmapData(50, 50);
-            missileSquare.rect(0, 0, 50, 50, 'rgb(255,10,10)');
+            let missileSquare = this.game.add.bitmapData(10, 50);
+            missileSquare.rect(0, 0, 10, 50, 'rgb(255,10,10)');
             this.game.cache.addBitmapData('missile', missileSquare);
         }
 
@@ -93,13 +93,13 @@ module GameModuleName {
             this.game.physics.arcade.enable(this.player);
             this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
             this.player.body.collideWorldBounds = true;
+            this.player.anchor.setTo(0.5, 0.5);
 
             this.missile = this.game.add.sprite(this.game.world.centerX, 50, this.game.cache.getBitmapData('missile'));
             this.game.physics.arcade.enable(this.missile);
             this.missile.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
             this.missile.body.collideWorldBounds = true;
-
-
+            this.missile.anchor.setTo(0.5, 0);
         }
 
         /*
@@ -130,12 +130,21 @@ module GameModuleName {
             }
         }
 
+        homeIn() {
+            if (this.game.physics.arcade.angleBetween(this.missile, this.player) - this.missile.body.angle > 0) {
+                this.missile.body.rotation += 10;
+            } else {
+                this.missile.body.rotation -= 10;
+            }
+
+            this.game.physics.arcade.velocityFromAngle(this.missile.body.rotation, 200, this.missile.body.velocity);
+        }
+
         update() {
             // reset the player's avatar's velocity so it won't move forever
             this.player.body.velocity.x = 0;
 
-            this.physics.arcade.accelerateToObject(this.missile, this.player, 1000, 5000, 5000);
-            this.physics.arcade.moveToObject(this.missile, this.player, 200);
+            this.homeIn();
 
             // processing cursor keys or onscreen controls input to move the player avatar
             if (this.cursors.left.isDown) {
