@@ -44,10 +44,10 @@ module GameModuleName {
             playerSquare.rect(0, 0, 64, 64, 'rgb(255, 192, 203)');
             this.game.cache.addBitmapData('player', playerSquare);
 
-            // test missile graphic
-            let missileSquare = this.game.add.bitmapData(10, 50);
-            missileSquare.rect(0, 0, 10, 50, 'rgb(255,10,10)');
-            this.game.cache.addBitmapData('missile', missileSquare);
+            // test ketchup graphic
+            let ketchupSqaure = this.game.add.bitmapData(10, 50);
+            ketchupSqaure.rect(0, 0, 10, 50, 'rgb(255,10,10)');
+            this.game.cache.addBitmapData('ketchup', ketchupSqaure);
         }
 
         create() {
@@ -62,6 +62,18 @@ module GameModuleName {
         Jump
     }
 
+    export class KetchupSprite extends Phaser.Sprite {
+        constructor(game: Phaser.Game, x: number, y: number, key: Phaser.BitmapData) {
+            super(game, x, y, key);
+
+            this.game.physics.arcade.enable(this);
+            this.checkWorldBounds = true;
+            this.outOfBoundsKill = true;
+
+            // Add to the display, but the physics system already did this, so this is redundant.
+            this.game.stage.addChild(this);
+        }
+    }
     /*
      * The main game running state
      */
@@ -71,6 +83,7 @@ module GameModuleName {
         player: Phaser.Sprite;
 
         missile: Phaser.Sprite;
+        ketchupGroup: Phaser.Group;
 
         // keyboard cursor key controls
         cursors: Phaser.CursorKeys;
@@ -95,11 +108,23 @@ module GameModuleName {
             this.player.body.collideWorldBounds = true;
             this.player.anchor.setTo(0.5, 0.5);
 
-            this.missile = this.game.add.sprite(this.game.world.centerX, 50, this.game.cache.getBitmapData('missile'));
-            this.game.physics.arcade.enable(this.missile);
-            this.missile.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
-            this.missile.body.collideWorldBounds = true;
-            this.missile.anchor.setTo(0.5, 0);
+            this.ketchupGroup = this.game.add.group();
+
+            let spawnTimer = this.game.time.create(false);
+            spawnTimer.loop(800, () => {
+                let singleKetchup = this.ketchupGroup.add(
+                    new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), this.game.cache.getBitmapData('ketchup'))
+                );
+
+                // wait then attack
+
+                let waitTimer = this.game.time.create(false);
+                waitTimer.add(500, () => {
+                    this.game.physics.arcade.moveToObject(singleKetchup, this.player, 200);
+                }, this);
+                waitTimer.start();
+            }, this);
+            spawnTimer.start();
         }
 
         /*
@@ -130,21 +155,9 @@ module GameModuleName {
             }
         }
 
-        homeIn() {
-            if (this.game.physics.arcade.angleBetween(this.missile, this.player) - this.missile.body.angle > 0) {
-                this.missile.body.rotation += 10;
-            } else {
-                this.missile.body.rotation -= 10;
-            }
-
-            this.game.physics.arcade.velocityFromAngle(this.missile.body.rotation, 200, this.missile.body.velocity);
-        }
-
         update() {
             // reset the player's avatar's velocity so it won't move forever
             this.player.body.velocity.x = 0;
-
-            this.homeIn();
 
             // processing cursor keys or onscreen controls input to move the player avatar
             if (this.cursors.left.isDown) {
