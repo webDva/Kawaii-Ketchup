@@ -81,6 +81,8 @@ module GameModuleName {
         game: Phaser.Game;
 
         player: Phaser.Sprite;
+        livesCounter: number = 10;
+        textLives: Phaser.Text;
 
         missile: Phaser.Sprite;
         ketchupGroup: Phaser.Group;
@@ -125,6 +127,13 @@ module GameModuleName {
                 waitTimer.start();
             }, this);
             spawnTimer.start();
+
+            this.textLives = this.game.add.text(0, 0, "" + this.livesCounter, {
+                font: '4em "Segoe UI", Impact, sans-serif',
+                fontWeight: "700",
+                fill: "#ffffff",
+                align: "center"
+            });
         }
 
         /*
@@ -155,7 +164,17 @@ module GameModuleName {
             }
         }
 
+        collisionKetchupPlayer(player: Phaser.Sprite, ketchup: KetchupSprite) {
+            ketchup.kill();
+
+            this.livesCounter--;
+        }
+
         update() {
+            this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
+
+            this.textLives.text = "" + this.livesCounter;
+
             // reset the player's avatar's velocity so it won't move forever
             this.player.body.velocity.x = 0;
 
