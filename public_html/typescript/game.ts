@@ -79,7 +79,9 @@ module GameModuleName {
 
         update() {
             if (this.isFollowing) {
-                this.game.physics.arcade.accelerateToObject(this, this.targetToFollow, 200);
+                let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.body);
+                this.body.velocity.x = Math.cos(angle) * 200;
+                this.body.velocity.y = Math.sin(angle) * 200;
             }
         }
     }
