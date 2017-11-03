@@ -63,6 +63,9 @@ module GameModuleName {
     }
 
     export class KetchupSprite extends Phaser.Sprite {
+        targetToFollow: Phaser.Sprite;
+        isFollowing: boolean = false;
+
         constructor(game: Phaser.Game, x: number, y: number, key: Phaser.BitmapData) {
             super(game, x, y, key);
 
@@ -73,6 +76,12 @@ module GameModuleName {
             // Add to the display, but the physics system already did this, so this is redundant.
             this.game.stage.addChild(this);
         }
+
+        update() {
+            if (this.isFollowing) {
+                this.game.physics.arcade.accelerateToObject(this, this.targetToFollow, 200);
+            }
+        }
     }
     /*
      * The main game running state
@@ -81,7 +90,7 @@ module GameModuleName {
         game: Phaser.Game;
 
         player: Phaser.Sprite;
-        livesCounter: number = 10;
+        livesCounter: number = 1000;
         textLives: Phaser.Text;
 
         missile: Phaser.Sprite;
@@ -120,11 +129,21 @@ module GameModuleName {
 
                 // wait then attack
 
-                let waitTimer = this.game.time.create(false);
+                let waitTimer = this.game.time.create(true);
                 waitTimer.add(500, () => {
-                    this.game.physics.arcade.moveToObject(singleKetchup, this.player, 200);
+                    singleKetchup.targetToFollow = this.player;
+                    singleKetchup.isFollowing = true;
                 }, this);
                 waitTimer.start();
+
+                // TTL
+
+                let TTLTimer = this.game.time.create(true);
+                TTLTimer.add(5000, () => {
+                    singleKetchup.kill();
+                    waitTimer.destroy();
+                }, this);
+                TTLTimer.start();
             }, this);
             spawnTimer.start();
 
