@@ -69,9 +69,7 @@ module GameModuleName {
         constructor(game: Phaser.Game, x: number, y: number, key: Phaser.BitmapData) {
             super(game, x, y, key);
 
-            this.game.physics.p2.enable(this);
-            this.body.setRectangleFromSprite();
-
+            this.game.physics.arcade.enable(this);
             this.checkWorldBounds = true;
             this.outOfBoundsKill = true;
 
@@ -100,15 +98,10 @@ module GameModuleName {
         missile: Phaser.Sprite;
         ketchupGroup: Phaser.Group;
 
-        playerCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-        ketchupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-
-        jumpTimer: number = 0;
-
         // keyboard cursor key controls
         cursors: Phaser.CursorKeys;
 
-        static MOVE_VELOCITY: number = 200;
+        static MOVE_VELOCITY: number = 365;
         static JUMP_VELOCITY: number = GameState.MOVE_VELOCITY + GameState.MOVE_VELOCITY * 0.38;
 
         constructor() {
@@ -116,46 +109,25 @@ module GameModuleName {
         }
 
         create() {
-            this.game.physics.startSystem(Phaser.Physics.P2JS);
-            this.game.physics.p2.gravity.y = 100;
-
-            this.game.physics.p2.setImpactEvents(true);
-            //this.game.physics.p2.restitution = 0.8;
-
-            this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
-            this.ketchupCollisionGroup = this.game.physics.p2.createCollisionGroup();
-
-            this.game.physics.p2.updateBoundsCollisionGroup();
+            this.game.physics.startSystem(Phaser.Physics.ARCADE);
+            //this.game.physics.arcade.gravity.x = -400;            
 
             // add cursor keys controls
             this.cursors = this.game.input.keyboard.createCursorKeys();
 
             this.player = this.game.add.sprite(100, this.game.world.centerY, this.game.cache.getBitmapData('player'));
-            this.game.physics.p2.enable(this.player);
-            this.player.body.fixedRotation = true;
-            this.player.body.setRectangleFromSprite();
-            this.player.body.setCollisionGroup(this.playerCollisionGroup);
-            this.player.body.dynamic = true;
-
-            let playerMaterial = this.game.physics.p2.createMaterial('playerMaterial', this.player.body);
-            let ketchupMaterial = this.game.physics.p2.createMaterial('ketchupMaterial');
-
-            this.player.body.collides(this.ketchupCollisionGroup, this.collisionKetchupPlayer, this);
-
-            let ketchupPlayerContactMaterial = this.game.physics.p2.createContactMaterial(playerMaterial, ketchupMaterial);
-            ketchupPlayerContactMaterial.restitution = 1;
+            this.game.physics.arcade.enable(this.player);
+            this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
+            this.player.body.collideWorldBounds = true;
+            this.player.anchor.setTo(0.5, 0.5);
 
             this.ketchupGroup = this.game.add.group();
 
             let spawnTimer = this.game.time.create(false);
             spawnTimer.loop(800, () => {
-                let singleKetchup: KetchupSprite = this.ketchupGroup.add(
+                let singleKetchup = this.ketchupGroup.add(
                     new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), this.game.cache.getBitmapData('ketchup'))
                 );
-
-                singleKetchup.body.setCollisionGroup(this.ketchupCollisionGroup);
-                singleKetchup.body.collides([this.ketchupCollisionGroup, this.playerCollisionGroup]);
-                singleKetchup.body.setMaterial(ketchupMaterial);
 
                 // wait then attack
 
@@ -191,62 +163,41 @@ module GameModuleName {
         movePlayer(direction: GameModuleName.Movement) {
             // The player's avatar's physics body will be disabled if they touch the lava hazards, so stop
             // controlling their movement if they're dead.
-            //            if (!this.player.body.enable) {
-            //                return;
-            //            }
+            if (!this.player.body.enable) {
+                return;
+            }
+
+            // If the player is in mid-air, decrease their movement speed by 10%.
+            let speedModifier = 0;
+            if (!this.player.body.onFloor()) {
+                speedModifier = 0.10 * GameState.MOVE_VELOCITY;
+            }
 
             if (direction === GameModuleName.Movement.Left) {
-                this.player.body.moveLeft(GameState.MOVE_VELOCITY);
-                //this.player.body.velocity.x = -GameState.MOVE_VELOCITY - speedModifier;
+                this.player.body.velocity.x = -GameState.MOVE_VELOCITY - speedModifier;
             } else if (direction === GameModuleName.Movement.Right) {
-                this.player.body.moveRight(GameState.MOVE_VELOCITY);
-                //this.player.body.velocity.x = GameState.MOVE_VELOCITY - speedModifier;
-            } else if (direction === GameModuleName.Movement.Jump && this.game.time.now > this.jumpTimer && this.canJump()) {
-                this.player.body.moveUp(GameState.JUMP_VELOCITY);
-                this.jumpTimer = this.game.time.now + 500;
-            }
-        }
-
-        canJump() {
-            let result = false;
-
-            for (let i = 0; i < this.game.physics.p2.world.narrowphase.contactEquations.length; i++) {
-                let c = this.game.physics.p2.world.narrowphase.contactEquations[i];
-
-                if (c.bodyA === this.player.body.data || c.bodyB === this.player.body.data) {
-                    let d = p2.vec2.dot(c.normalA, p2.vec2.fromValues(0, 1));
-
-                    if (c.bodyA === this.player.body.data) {
-                        d *= -1;
-                    }
-
-                    if (d > 0.5) {
-                        result = true;
-                    }
+                this.player.body.velocity.x = GameState.MOVE_VELOCITY - speedModifier;
+            } else if (direction === GameModuleName.Movement.Jump) {
+                // checks to see if the player is on the ground, then jumps and plays jumping sound
+                if (this.player.body.onFloor()) {
+                    this.player.body.velocity.y = -GameState.JUMP_VELOCITY;
                 }
             }
-
-            return result;
         }
 
-        collisionKetchupPlayer(playerBody: Phaser.Physics.P2.Body, ketchup: Phaser.Physics.P2.Body) {
-            ketchup.sprite.update = () => {};
-            let killTimer = this.game.time.create(true);
-            killTimer.add(1900, () => {
-                ketchup.sprite.kill();
-            }, this);
-            killTimer.start();
+        collisionKetchupPlayer(player: Phaser.Sprite, ketchup: KetchupSprite) {
+            ketchup.kill();
 
             this.livesCounter--;
         }
 
         update() {
-            //this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
+            this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
 
             this.textLives.text = "" + this.livesCounter;
 
             // reset the player's avatar's velocity so it won't move forever
-            //this.player.body.velocity.x = 0;
+            this.player.body.velocity.x = 0;
 
             // processing cursor keys or onscreen controls input to move the player avatar
             if (this.cursors.left.isDown) {
@@ -254,8 +205,6 @@ module GameModuleName {
             }
             else if (this.cursors.right.isDown) {
                 this.movePlayer(GameModuleName.Movement.Right);
-            } else {
-                this.player.body.velocity.x = 0;
             }
             if (this.cursors.up.isDown) {
                 this.movePlayer(GameModuleName.Movement.Jump);
