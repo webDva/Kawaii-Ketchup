@@ -102,12 +102,18 @@ module GameModuleName {
         game: Phaser.Game;
 
         player: Phaser.Sprite;
-        livesCounter: number = 1000;
+        livesCounter: number = 100;
         textLives: Phaser.Text;
+        textRaisins: Phaser.Text;
 
         missile: Phaser.Sprite;
         ketchupGroup: Phaser.Group;
         raisinGroup: Phaser.Group;
+
+        raisinsCollected: number = 0;
+
+        lifeBar: Phaser.Graphics;
+        lifeBarHolder: Phaser.Graphics;
 
         // keyboard cursor key controls
         cursors: Phaser.CursorKeys;
@@ -160,10 +166,17 @@ module GameModuleName {
             }, this);
             spawnTimer.start();
 
-            this.textLives = this.game.add.text(0, 0, "" + this.livesCounter, {
+            this.textLives = this.game.add.text(0, 50, "" + this.livesCounter, {
                 font: '4em "Segoe UI", Impact, sans-serif',
                 fontWeight: "700",
                 fill: "#ffffff",
+                align: "center"
+            });
+
+            this.textRaisins = this.game.add.text(0, this.textLives.bottom, "" + this.raisinsCollected, {
+                font: '4em "Segoe UI", Impact, sans-serif',
+                fontWeight: "700",
+                fill: "#361b4f",
                 align: "center"
             });
 
@@ -179,18 +192,22 @@ module GameModuleName {
                 this.game.physics.arcade.enable(singleRaisin);
             }, this);
             raisinSpawnTimer.start();
+
+            this.lifeBarHolder = this.game.add.graphics(10, 10);
+            this.lifeBarHolder.lineStyle(5, 0xffffff);
+            this.lifeBarHolder.drawRoundedRect(0, 0, 100, 30, 9);
+
+            this.lifeBar = this.game.add.graphics(10, 10);
+            this.lifeBar.beginFill(0xF1C40F);
+            this.lifeBar.drawRoundedRect(0, 0, 100 * this.livesCounter / 100, 30, 9);
+            this.lifeBar.endFill();
+            this.lifeBar.beginFill(0x999999);
         }
 
         /*
          * controls player horizontal movement
          */
         movePlayer(direction: GameModuleName.Movement) {
-            // The player's avatar's physics body will be disabled if they touch the lava hazards, so stop
-            // controlling their movement if they're dead.
-            if (!this.player.body.enable) {
-                return;
-            }
-
             // If the player is in mid-air, decrease their movement speed by 10%.
             let speedModifier = 0;
             if (!this.player.body.onFloor()) {
@@ -225,6 +242,7 @@ module GameModuleName {
 
         collisionRaisinPlayer(player: Phaser.Sprite, raisin: Phaser.Sprite) {
             raisin.kill();
+            this.raisinsCollected++;
         }
 
         update() {
@@ -232,6 +250,7 @@ module GameModuleName {
             this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayer, null, this);
 
             this.textLives.text = "" + this.livesCounter;
+            this.textRaisins.text = "" + this.raisinsCollected;
 
             // reset the player's avatar's velocity so it won't move forever
             this.player.body.velocity.x = 0;
@@ -246,6 +265,12 @@ module GameModuleName {
             if (this.cursors.up.isDown) {
                 this.movePlayer(GameModuleName.Movement.Jump);
             }
+
+            this.lifeBar.clear();
+            this.lifeBar.beginFill(0xF1C40F);
+            this.lifeBar.drawRoundedRect(0, 0, 100 * this.livesCounter / 100, 30, 9);
+            this.lifeBar.endFill();
+            this.lifeBar.beginFill(0x999999);
         }
     }
 
