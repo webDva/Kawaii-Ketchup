@@ -14,7 +14,7 @@ module GameModuleName {
             // Set scale using ScaleManager
             this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
             // Set background color
-            this.game.stage.backgroundColor = "#312341";
+            this.game.stage.backgroundColor = "#1e97d8";
         }
 
         preload() {
@@ -53,6 +53,11 @@ module GameModuleName {
             let explosionCircle = this.game.add.bitmapData(32, 32);
             explosionCircle.circle(16, 16, 16, 'rgb(255,255,255');
             this.game.cache.addBitmapData('explosionCircle', explosionCircle);
+
+            // raisin graphic
+            let raisin = this.game.add.bitmapData(24, 24);
+            raisin.circle(12, 12, 12, 'rgb(54, 27, 79)');
+            this.game.cache.addBitmapData('raisin', raisin);
         }
 
         create() {
@@ -102,6 +107,7 @@ module GameModuleName {
 
         missile: Phaser.Sprite;
         ketchupGroup: Phaser.Group;
+        raisinGroup: Phaser.Group;
 
         // keyboard cursor key controls
         cursors: Phaser.CursorKeys;
@@ -160,6 +166,19 @@ module GameModuleName {
                 fill: "#ffffff",
                 align: "center"
             });
+
+            this.raisinGroup = this.game.add.group();
+
+            let raisinSpawnTimer = this.game.time.create(false);
+            raisinSpawnTimer.loop(1500, () => {
+                let singleRaisin = this.raisinGroup.create(
+                    this.game.rnd.integerInRange(0, this.game.width - 24),
+                    this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24),
+                    this.game.cache.getBitmapData('raisin'));
+
+                this.game.physics.arcade.enable(singleRaisin);
+            }, this);
+            raisinSpawnTimer.start();
         }
 
         /*
@@ -204,8 +223,13 @@ module GameModuleName {
             this.livesCounter--;
         }
 
+        collisionRaisinPlayer(player: Phaser.Sprite, raisin: Phaser.Sprite) {
+            raisin.kill();
+        }
+
         update() {
             this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
+            this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayer, null, this);
 
             this.textLives.text = "" + this.livesCounter;
 
