@@ -48,6 +48,11 @@ module GameModuleName {
             let ketchupSqaure = this.game.add.bitmapData(10, 50);
             ketchupSqaure.rect(0, 0, 10, 50, 'rgb(255,10,10)');
             this.game.cache.addBitmapData('ketchup', ketchupSqaure);
+
+            // explosion graphic
+            let explosionCircle = this.game.add.bitmapData(32, 32);
+            explosionCircle.circle(16, 16, 16, 'rgb(255,255,255');
+            this.game.cache.addBitmapData('explosionCircle', explosionCircle);
         }
 
         create() {
@@ -186,8 +191,16 @@ module GameModuleName {
         }
 
         collisionKetchupPlayer(player: Phaser.Sprite, ketchup: KetchupSprite) {
-            ketchup.kill();
+            let newExplosion = this.game.add.sprite(ketchup.x, ketchup.y, this.game.cache.getBitmapData('explosionCircle'));
+            newExplosion.anchor.setTo(0.5, 0.5);
+            this.game.physics.arcade.enable(newExplosion);
 
+            let tween = this.game.add.tween(newExplosion.scale).to({x: 5, y: 5}, 300, "Linear", true);
+            tween.onComplete.add(() => {
+                newExplosion.kill();
+            }, this);
+
+            ketchup.kill();
             this.livesCounter--;
         }
 
