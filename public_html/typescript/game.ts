@@ -39,15 +39,8 @@ module GameModuleName {
             // Display the loading screen image
             // Load assets
 
-            // test square graphic
-            let playerSquare = this.game.add.bitmapData(64, 64);
-            playerSquare.rect(0, 0, 64, 64, 'rgb(255, 192, 203)');
-            this.game.cache.addBitmapData('player', playerSquare);
-
-            // test ketchup graphic
-            let ketchupSqaure = this.game.add.bitmapData(10, 50);
-            ketchupSqaure.rect(0, 0, 10, 50, 'rgb(255,10,10)');
-            this.game.cache.addBitmapData('ketchup', ketchupSqaure);
+            this.game.load.image('player', 'assets/kawaii_chan.png');
+            this.game.load.image('ketchup', 'assets/ketchup_test.png');
 
             // explosion graphic
             let explosionCircle = this.game.add.bitmapData(32, 32);
@@ -77,12 +70,15 @@ module GameModuleName {
         targetToFollow: Phaser.Sprite;
         isFollowing: boolean = false;
 
-        constructor(game: Phaser.Game, x: number, y: number, key: Phaser.BitmapData) {
+        constructor(game: Phaser.Game, x: number, y: number, key: string) {
             super(game, x, y, key);
 
             this.game.physics.arcade.enable(this);
             this.checkWorldBounds = true;
             this.outOfBoundsKill = true;
+            this.anchor.setTo(0.5, 0.5);
+
+            this.scale.setTo(1.5, 1.5);
 
             // Add to the display, but the physics system already did this, so this is redundant.
             this.game.stage.addChild(this);
@@ -93,6 +89,8 @@ module GameModuleName {
                 let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.body);
                 this.body.velocity.x = Math.cos(angle) * 200;
                 this.body.velocity.y = Math.sin(angle) * 200;
+
+                this.rotation = angle + Math.PI / 2;
             }
         }
     }
@@ -133,7 +131,8 @@ module GameModuleName {
             // add cursor keys controls
             this.cursors = this.game.input.keyboard.createCursorKeys();
 
-            this.player = this.game.add.sprite(100, this.game.world.centerY, this.game.cache.getBitmapData('player'));
+            this.player = this.game.add.sprite(100, this.game.world.centerY, 'player');
+            this.player.scale.setTo(2, 2);
             this.game.physics.arcade.enable(this.player);
             this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
             this.player.body.collideWorldBounds = true;
@@ -144,7 +143,7 @@ module GameModuleName {
             let spawnTimer = this.game.time.create(false);
             spawnTimer.loop(800, () => {
                 let singleKetchup = this.ketchupGroup.add(
-                    new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), this.game.cache.getBitmapData('ketchup'))
+                    new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
                 );
 
                 // wait then attack
@@ -242,6 +241,8 @@ module GameModuleName {
 
             ketchup.kill();
             this.health--;
+
+            this.game.camera.shake(0.01, 250);
         }
 
         collisionRaisinPlayer(player: Phaser.Sprite, raisin: Phaser.Sprite) {
