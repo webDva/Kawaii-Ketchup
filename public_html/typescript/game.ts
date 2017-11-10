@@ -86,8 +86,37 @@ module KetchupAndRaisins {
 
             this.scale.setTo(1.5, 1.5); // Increase the size of the ketchup bottles so that the player can more easily see them.
 
+            // Timers for ketchup actions.
+
+            // Timer for beginning attacking.
+            let waitTimer = this.game.time.create(true);
+            waitTimer.add(PlayingState.KETCHUP_BEGIN_ATTACK_TIME, () => {
+                this.followPlayer();
+            }, this);
+
+            // TTL timer.
+            let TTLTimer = this.game.time.create(true);
+            TTLTimer.add(PlayingState.KETCHUP_TTL, () => {
+                this.kill();
+            }, this);
+
+            // Start the timers
+            waitTimer.start();
+            TTLTimer.start();
+
             // Add to the display, but the physics system already did this, so this is redundant.
             this.game.stage.addChild(this);
+        }
+
+        /*
+         * Initialize or feed the ketchup bottle with information from the game state, such as the player sprite.
+         */
+        initialize(player: Phaser.Sprite) {
+            this.targetToFollow = player;
+        }
+
+        followPlayer() {
+            this.isFollowing = true;
         }
 
         update() {
@@ -129,6 +158,8 @@ module KetchupAndRaisins {
         static INITIAL_HEALTH: number = 100;
 
         static KETCHUP_SPAWN_RATE: number = 800; // Number of milliseconds for spawning ketchup bottles.
+        static KETCHUP_BEGIN_ATTACK_TIME: number = 500; //Number of milliseconds to wait before attacking the player.
+        static KETCHUP_TTL: number = 5000; // Number of milliseconds for each individual ketchup to live.
 
         static RAISIN_POINT_VALUE: number = 10; // How much collecting an individual raisin is worth.
         static HEAL_AMOUNT: number = 1; // Determines how much to increase the player's health by when a raisin is collected.
@@ -164,28 +195,14 @@ module KetchupAndRaisins {
             // A spawn timer for creating ketchup bottles.
             let spawnTimer = this.game.time.create(false);
             spawnTimer.loop(PlayingState.KETCHUP_SPAWN_RATE, () => {
-                let singleKetchup = this.ketchupGroup.add(
+                let singleKetchup: KetchupSprite = this.ketchupGroup.add(
                     new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
                 );
-
-                // Wait, then attack the player.
-
-                let waitTimer = this.game.time.create(true);
-                waitTimer.add(500, () => {
-                    singleKetchup.targetToFollow = this.player;
-                    singleKetchup.isFollowing = true;
-                }, this);
-                waitTimer.start();
-
-                // TTL
-
-                let TTLTimer = this.game.time.create(true);
-                TTLTimer.add(5000, () => {
-                    singleKetchup.kill();
-                    waitTimer.destroy();
-                }, this);
-                TTLTimer.start();
+                // Feed the new ketchup bottle information from this game state.
+                singleKetchup.initialize(this.player);
             }, this);
+
+            // Start the spawner timer loop.
             spawnTimer.start();
 
             this.textScore = this.game.add.text(0, 50, "", {
