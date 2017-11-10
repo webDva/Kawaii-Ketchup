@@ -74,6 +74,7 @@ module GameModuleName {
             super(game, x, y, key);
 
             this.game.physics.arcade.enable(this);
+            this.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, 400);
             this.checkWorldBounds = true;
             this.outOfBoundsKill = true;
             this.anchor.setTo(0.5, 0.5);
@@ -86,7 +87,7 @@ module GameModuleName {
 
         update() {
             if (this.isFollowing) {
-                let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.body);
+                let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.position);
                 this.body.velocity.x = Math.cos(angle) * 200;
                 this.body.velocity.y = Math.sin(angle) * 200;
 
