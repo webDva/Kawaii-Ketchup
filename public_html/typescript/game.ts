@@ -69,7 +69,8 @@ module GameModuleName {
     export enum Movement {
         Left,
         Right,
-        Jump
+        Jump,
+        Down
     }
 
     export class KetchupSprite extends Phaser.Sprite {
@@ -102,9 +103,10 @@ module GameModuleName {
         game: Phaser.Game;
 
         player: Phaser.Sprite;
-        livesCounter: number = 100;
-        textLives: Phaser.Text;
-        textRaisins: Phaser.Text;
+        health: number = 100;
+        static INITIAL_HEALTH: number = 100;
+        score: number = 0;
+        textScore: Phaser.Text;
 
         missile: Phaser.Sprite;
         ketchupGroup: Phaser.Group;
@@ -113,7 +115,6 @@ module GameModuleName {
         raisinsCollected: number = 0;
 
         lifeBar: Phaser.Graphics;
-        lifeBarHolder: Phaser.Graphics;
 
         // keyboard cursor key controls
         cursors: Phaser.CursorKeys;
@@ -166,17 +167,10 @@ module GameModuleName {
             }, this);
             spawnTimer.start();
 
-            this.textLives = this.game.add.text(0, 50, "" + this.livesCounter, {
+            this.textScore = this.game.add.text(0, 50, "" + this.raisinsCollected, {
                 font: '4em "Segoe UI", Impact, sans-serif',
                 fontWeight: "700",
-                fill: "#ffffff",
-                align: "center"
-            });
-
-            this.textRaisins = this.game.add.text(0, this.textLives.bottom, "" + this.raisinsCollected, {
-                font: '4em "Segoe UI", Impact, sans-serif',
-                fontWeight: "700",
-                fill: "#361b4f",
+                fill: "#2FDF00",
                 align: "center"
             });
 
@@ -193,15 +187,23 @@ module GameModuleName {
             }, this);
             raisinSpawnTimer.start();
 
-            this.lifeBarHolder = this.game.add.graphics(10, 10);
-            this.lifeBarHolder.lineStyle(5, 0xffffff);
-            this.lifeBarHolder.drawRoundedRect(0, 0, 100, 30, 9);
-
             this.lifeBar = this.game.add.graphics(10, 10);
-            this.lifeBar.beginFill(0xF1C40F);
-            this.lifeBar.drawRoundedRect(0, 0, 100 * this.livesCounter / 100, 30, 9);
+            this.lifeBar.beginFill(0xC70039);
+            this.lifeBar.drawRoundedRect(0, 0, (this.game.width - 20) * (this.health / GameState.INITIAL_HEALTH), 30, 9);
             this.lifeBar.endFill();
             this.lifeBar.beginFill(0x999999);
+
+            let dyingHealthTimer = this.game.time.create(false);
+            dyingHealthTimer.loop(1800, () => {
+                this.health--;
+            }, this);
+            dyingHealthTimer.start();
+
+            let incrementScoreTimer = this.game.time.create(false);
+            incrementScoreTimer.loop(900, () => {
+                this.score += 80;
+            }, this);
+            incrementScoreTimer.start();
         }
 
         /*
@@ -223,6 +225,8 @@ module GameModuleName {
                 if (this.player.body.onFloor()) {
                     this.player.body.velocity.y = -GameState.JUMP_VELOCITY;
                 }
+            } else if (direction === GameModuleName.Movement.Down) {
+                this.player.body.velocity.y = GameState.MOVE_VELOCITY;
             }
         }
 
@@ -237,20 +241,22 @@ module GameModuleName {
             }, this);
 
             ketchup.kill();
-            this.livesCounter--;
+            this.health--;
         }
 
         collisionRaisinPlayer(player: Phaser.Sprite, raisin: Phaser.Sprite) {
             raisin.kill();
-            this.raisinsCollected++;
+            this.score += 10;
+            if (this.health < GameState.INITIAL_HEALTH) {
+                this.health++;
+            }
         }
 
         update() {
             this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
             this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayer, null, this);
 
-            this.textLives.text = "" + this.livesCounter;
-            this.textRaisins.text = "" + this.raisinsCollected;
+            this.textScore.text = "" + this.score;
 
             // reset the player's avatar's velocity so it won't move forever
             this.player.body.velocity.x = 0;
@@ -264,11 +270,13 @@ module GameModuleName {
             }
             if (this.cursors.up.isDown) {
                 this.movePlayer(GameModuleName.Movement.Jump);
+            } else if (this.cursors.down.isDown) {
+                this.movePlayer(GameModuleName.Movement.Down);
             }
 
             this.lifeBar.clear();
-            this.lifeBar.beginFill(0xF1C40F);
-            this.lifeBar.drawRoundedRect(0, 0, 100 * this.livesCounter / 100, 30, 9);
+            this.lifeBar.beginFill(0xC70039);
+            this.lifeBar.drawRoundedRect(0, 0, (this.game.width - 20) * (this.health / GameState.INITIAL_HEALTH), 30, 9);
             this.lifeBar.endFill();
             this.lifeBar.beginFill(0x999999);
         }
@@ -278,7 +286,7 @@ module GameModuleName {
         game: Phaser.Game;
 
         constructor() {
-            this.game = new Phaser.Game(550, 550, Phaser.AUTO, "phaser");
+            this.game = new Phaser.Game(800, 600, Phaser.AUTO, "phaser");
 
             /* The boot state will contain an init() for the scale manager and will load the loading screen,
              * while the preloader will display the loading screen and load assets and then start the main game state.
