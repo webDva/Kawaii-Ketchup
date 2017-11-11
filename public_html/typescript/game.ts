@@ -73,13 +73,12 @@ module KetchupAndRaisins {
     export class KetchupSprite extends Phaser.Sprite {
 
         targetToFollow: Phaser.Sprite; // Will be following the player sprite.
-        isFollowing: boolean = false; // Initially, it won't be following the player at its birth.
+        attackTimer: Phaser.Timer; // Looped timer for attacking the player.
 
         constructor(game: Phaser.Game, x: number, y: number, key: string) {
             super(game, x, y, key);
 
             this.game.physics.arcade.enable(this);
-            this.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_COMPONENT);
             this.checkWorldBounds = true;
             this.outOfBoundsKill = true;
             this.anchor.setTo(0.5, 0.5); // Set the center of the ketchup bottles.
@@ -88,16 +87,22 @@ module KetchupAndRaisins {
 
             // Timers for ketchup actions.
 
-            // Timer for beginning attacking.
-            let waitTimer = this.game.time.create(true);
-            waitTimer.add(PlayingState.KETCHUP_BEGIN_ATTACK_TIME, this.followPlayer, this);
+            this.attackTimer = this.game.time.create();
+            this.attackTimer.loop(900, () => {
+                let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.position);
+
+                this.body.velocity.x = Math.cos(angle) * 200;
+                this.body.velocity.y = Math.sin(angle) * 200;
+
+                this.rotation = angle + Math.PI / 2; // Changing the rotation so that it can look better than if the rotation wasn't changed.                
+            }, this);
 
             // TTL timer.
-            let TTLTimer = this.game.time.create(true);
+            let TTLTimer = this.game.time.create();
             TTLTimer.add(PlayingState.KETCHUP_TTL, this.explode, this);
 
             // Start the timers
-            waitTimer.start();
+            this.attackTimer.start(PlayingState.KETCHUP_BEGIN_ATTACK_TIME); // A delay
             TTLTimer.start();
 
             // Add to the display, but the physics system already did this, so this is redundant.
@@ -111,16 +116,12 @@ module KetchupAndRaisins {
             this.targetToFollow = player;
         }
 
-        followPlayer() {
-            this.isFollowing = true;
-        }
-
         explode() {
             // Disable the ketchup bottle's physics body so that it will no longer collide as it's now exploding and dying.
             this.body.enable = false;
 
-            // Stop following the player too.
-            this.isFollowing = false;
+            // Stop the attack timer.
+            this.attackTimer.stop();
 
             // Change the texture of the ketchup bottle to an explosion.
             this.loadTexture(this.game.cache.getBitmapData('explosionCircle'));
@@ -130,16 +131,6 @@ module KetchupAndRaisins {
             tween.onComplete.add(() => {
                 this.kill();
             }, this);
-        }
-
-        update() {
-            if (this.isFollowing) {
-                let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.position);
-                this.body.velocity.x = Math.cos(angle) * 200;
-                this.body.velocity.y = Math.sin(angle) * 200;
-
-                this.rotation = angle + Math.PI / 2; // Changing the rotation so that it can look better than if the rotation wasn't changed.
-            }
         }
     }
     /*
@@ -209,7 +200,7 @@ module KetchupAndRaisins {
             this.raisinGroup = this.game.add.group();
 
             // A spawn timer for creating ketchup bottles.
-            let ketchupSpawnTimer = this.game.time.create(false);
+            let ketchupSpawnTimer = this.game.time.create();
             ketchupSpawnTimer.loop(PlayingState.KETCHUP_SPAWN_RATE, () => {
                 let singleKetchup: KetchupSprite = this.ketchupGroup.add(
                     new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
@@ -226,7 +217,7 @@ module KetchupAndRaisins {
             });
 
             // Responsible for creating new raisin collectibles.
-            let raisinSpawnTimer = this.game.time.create(false);
+            let raisinSpawnTimer = this.game.time.create();
             raisinSpawnTimer.loop(1500, () => {
                 let singleRaisin = this.raisinGroup.create(
                     this.game.rnd.integerInRange(0, this.game.width - 24),
@@ -241,13 +232,13 @@ module KetchupAndRaisins {
             this.drawHealthBar();
 
             // Decreases the player's health over time.
-            let dyingHealthTimer = this.game.time.create(false);
+            let dyingHealthTimer = this.game.time.create();
             dyingHealthTimer.loop(PlayingState.HEALTH_DECREASE_TIME, () => {
                 this.currentHealth -= PlayingState.HEALTH_DECREASE_AMOUNT;
             }, this);
 
             // Responsible for calculating the player's score.
-            let calculateScoreTimer = this.game.time.create(false);
+            let calculateScoreTimer = this.game.time.create();
             calculateScoreTimer.loop(900, () => {
                 this.score += 80;
             }, this);
