@@ -94,7 +94,7 @@ module KetchupAndRaisins {
 
             // TTL timer.
             let TTLTimer = this.game.time.create(true);
-            TTLTimer.add(PlayingState.KETCHUP_TTL, this.die, this);
+            TTLTimer.add(PlayingState.KETCHUP_TTL, this.explode, this);
 
             // Start the timers
             waitTimer.start();
@@ -115,8 +115,21 @@ module KetchupAndRaisins {
             this.isFollowing = true;
         }
 
-        die() {
-            this.kill();
+        explode() {
+            // Disable the ketchup bottle's physics body so that it will no longer collide as it's now exploding and dying.
+            this.body.enable = false;
+
+            // Stop following the player too.
+            this.isFollowing = false;
+
+            // Change the texture of the ketchup bottle to an explosion.
+            this.loadTexture(this.game.cache.getBitmapData('explosionCircle'));
+
+            // An animation tween for creating an explosion effect. When done animating, kills the ketchup sprite.
+            let tween = this.game.add.tween(this.scale).to({x: 5, y: 5}, 300, "Linear", true);
+            tween.onComplete.add(() => {
+                this.kill();
+            }, this);
         }
 
         update() {
@@ -273,18 +286,8 @@ module KetchupAndRaisins {
         }
 
         collisionKetchupPlayer(player: Phaser.Sprite, ketchup: KetchupSprite) {
-            let newExplosion = this.game.add.sprite(ketchup.x, ketchup.y, this.game.cache.getBitmapData('explosionCircle'));
-            newExplosion.anchor.setTo(0.5, 0.5);
-            this.game.physics.arcade.enable(newExplosion);
-
-            let tween = this.game.add.tween(newExplosion.scale).to({x: 5, y: 5}, 300, "Linear", true);
-            tween.onComplete.add(() => {
-                newExplosion.kill();
-            }, this);
-
-            ketchup.kill();
+            ketchup.explode();
             this.currentHealth--;
-
             this.game.camera.shake(0.01, 250);
         }
 
