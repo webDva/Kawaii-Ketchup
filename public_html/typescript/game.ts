@@ -79,7 +79,7 @@ module KetchupAndRaisins {
             super(game, x, y, key);
 
             this.game.physics.arcade.enable(this);
-            this.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_VECTOR);
+            this.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_COMPONENT);
             this.checkWorldBounds = true;
             this.outOfBoundsKill = true;
             this.anchor.setTo(0.5, 0.5); // Set the center of the ketchup bottles.
@@ -147,13 +147,13 @@ module KetchupAndRaisins {
         healthBar: Phaser.Graphics;
 
         // keyboard cursor key controls
-        cursors: Phaser.CursorKeys;
+        cursorKeys: Phaser.CursorKeys;
 
         // A bunch of constant values.
 
         static MOVEMENT_SPEED: number = 365;
         static JUMPING_SPEED: number = PlayingState.MOVEMENT_SPEED + PlayingState.MOVEMENT_SPEED * 0.38;
-        static GRAVITY_Y_VECTOR: number = 400;
+        static GRAVITY_Y_COMPONENT: number = 400;
 
         static INITIAL_HEALTH: number = 100;
 
@@ -181,18 +181,19 @@ module KetchupAndRaisins {
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
             // add cursor keys controls
-            this.cursors = this.game.input.keyboard.createCursorKeys();
+            this.cursorKeys = this.game.input.keyboard.createCursorKeys();
 
             // Add and configure the player sprite.
             this.player = this.game.add.sprite(100, this.game.world.centerY, 'player');
             this.player.scale.setTo(2, 2); // Increase the player's sprite size so that it can be more easily seen.
             this.game.physics.arcade.enable(this.player);
-            this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_VECTOR);
+            this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_COMPONENT);
             this.player.body.collideWorldBounds = true;
             this.player.anchor.setTo(0.5, 0.5);
 
-            // Create the Group that will hold the ketchup bottles.
+            // Create the Groups that will hold the ketchup bottles and raisin collectibles.
             this.ketchupGroup = this.game.add.group();
+            this.raisinGroup = this.game.add.group();
 
             // A spawn timer for creating ketchup bottles.
             let ketchupSpawnTimer = this.game.time.create(false);
@@ -210,9 +211,6 @@ module KetchupAndRaisins {
                 fill: PlayingState.SCORE_TEXT_COLOR,
                 align: "center"
             });
-
-            // Create the group that will hold the raisin collectibles.
-            this.raisinGroup = this.game.add.group();
 
             // Responsible for creating new raisin collectibles.
             let raisinSpawnTimer = this.game.time.create(false);
@@ -314,21 +312,22 @@ module KetchupAndRaisins {
             this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
             this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayer, null, this);
 
+            // Update the score text graphic.
             this.textScore.text = "" + this.score;
 
             // reset the player's avatar's velocity so it won't move forever
             this.player.body.velocity.x = 0;
 
             // processing cursor keys or onscreen controls input to move the player avatar
-            if (this.cursors.left.isDown) {
+            if (this.cursorKeys.left.isDown) {
                 this.movePlayer(KetchupAndRaisins.Movement.Left);
             }
-            else if (this.cursors.right.isDown) {
+            else if (this.cursorKeys.right.isDown) {
                 this.movePlayer(KetchupAndRaisins.Movement.Right);
             }
-            if (this.cursors.up.isDown) {
+            if (this.cursorKeys.up.isDown) {
                 this.movePlayer(KetchupAndRaisins.Movement.Up);
-            } else if (this.cursors.down.isDown) {
+            } else if (this.cursorKeys.down.isDown) {
                 this.movePlayer(KetchupAndRaisins.Movement.Down);
             }
 
