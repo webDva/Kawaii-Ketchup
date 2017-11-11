@@ -90,15 +90,11 @@ module KetchupAndRaisins {
 
             // Timer for beginning attacking.
             let waitTimer = this.game.time.create(true);
-            waitTimer.add(PlayingState.KETCHUP_BEGIN_ATTACK_TIME, () => {
-                this.followPlayer();
-            }, this);
+            waitTimer.add(PlayingState.KETCHUP_BEGIN_ATTACK_TIME, this.followPlayer, this);
 
             // TTL timer.
             let TTLTimer = this.game.time.create(true);
-            TTLTimer.add(PlayingState.KETCHUP_TTL, () => {
-                this.kill();
-            }, this);
+            TTLTimer.add(PlayingState.KETCHUP_TTL, this.die, this);
 
             // Start the timers
             waitTimer.start();
@@ -117,6 +113,10 @@ module KetchupAndRaisins {
 
         followPlayer() {
             this.isFollowing = true;
+        }
+
+        die() {
+            this.kill();
         }
 
         update() {
@@ -144,7 +144,7 @@ module KetchupAndRaisins {
         ketchupGroup: Phaser.Group;
         raisinGroup: Phaser.Group;
 
-        lifeBar: Phaser.Graphics;
+        healthBar: Phaser.Graphics;
 
         // keyboard cursor key controls
         cursors: Phaser.CursorKeys;
@@ -163,8 +163,10 @@ module KetchupAndRaisins {
 
         static RAISIN_POINT_VALUE: number = 10; // How much collecting an individual raisin is worth.
         static HEAL_AMOUNT: number = 1; // Determines how much to increase the player's health by when a raisin is collected.
+        static HEALTH_DECREASE_TIME: number = 1800; // Number of milliseconds for how often to decrease the player's health.
+        static HEALTH_DECREASE_AMOUNT: number = 1; // How much health to decrease per tick.
 
-        static LIFEBAR_COLOR: number = 0xC70039;
+        static HEALTHBAR_COLOR: number = 0xC70039;
         static SCORE_TEXT_COLOR: string = "#2FDF00";
 
         // Unused stuff can go here.
@@ -193,17 +195,14 @@ module KetchupAndRaisins {
             this.ketchupGroup = this.game.add.group();
 
             // A spawn timer for creating ketchup bottles.
-            let spawnTimer = this.game.time.create(false);
-            spawnTimer.loop(PlayingState.KETCHUP_SPAWN_RATE, () => {
+            let ketchupSpawnTimer = this.game.time.create(false);
+            ketchupSpawnTimer.loop(PlayingState.KETCHUP_SPAWN_RATE, () => {
                 let singleKetchup: KetchupSprite = this.ketchupGroup.add(
                     new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
                 );
                 // Feed the new ketchup bottle information from this game state.
                 singleKetchup.initialize(this.player);
             }, this);
-
-            // Start the spawner timer loop.
-            spawnTimer.start();
 
             this.textScore = this.game.add.text(0, 50, "", {
                 font: '4em "Segoe UI", Impact, sans-serif',
@@ -212,8 +211,10 @@ module KetchupAndRaisins {
                 align: "center"
             });
 
+            // Create the group that will hold the raisin collectibles.
             this.raisinGroup = this.game.add.group();
 
+            // Responsible for creating new raisin collectibles.
             let raisinSpawnTimer = this.game.time.create(false);
             raisinSpawnTimer.loop(1500, () => {
                 let singleRaisin = this.raisinGroup.create(
@@ -223,23 +224,31 @@ module KetchupAndRaisins {
 
                 this.game.physics.arcade.enable(singleRaisin);
             }, this);
-            raisinSpawnTimer.start();
 
-            this.lifeBar = this.game.add.graphics(10, 10);
-            this.drawLifeBar();
+            // Create the long health bar that gets displayed at the top of the screen.
+            this.healthBar = this.game.add.graphics(10, 10);
+            this.drawHealthBar();
 
+            // Decreases the player's health over time.
             let dyingHealthTimer = this.game.time.create(false);
-            dyingHealthTimer.loop(1800, () => {
-                this.currentHealth--;
+            dyingHealthTimer.loop(PlayingState.HEALTH_DECREASE_TIME, () => {
+                this.currentHealth -= PlayingState.HEALTH_DECREASE_AMOUNT;
             }, this);
-            dyingHealthTimer.start();
 
-            let incrementScoreTimer = this.game.time.create(false);
-            incrementScoreTimer.loop(900, () => {
+            // Responsible for calculating the player's score.
+            let calculateScoreTimer = this.game.time.create(false);
+            calculateScoreTimer.loop(900, () => {
                 this.score += 80;
             }, this);
-            incrementScoreTimer.start();
+
+            // Start all the timers.
+            ketchupSpawnTimer.start();
+            raisinSpawnTimer.start();
+            dyingHealthTimer.start();
+            calculateScoreTimer.start();
         }
+
+        // Class methods for the playing state.
 
         /*
          * controls player horizontal movement
@@ -292,15 +301,16 @@ module KetchupAndRaisins {
         /*
          * For drawing the player's health bar at the top of the screen.
          */
-        drawLifeBar() {
-            this.lifeBar.clear();
-            this.lifeBar.beginFill(PlayingState.LIFEBAR_COLOR);
-            this.lifeBar.drawRoundedRect(0, 0, (this.game.width - 20) * (this.currentHealth / PlayingState.INITIAL_HEALTH), 30, 9);
-            this.lifeBar.endFill();
-            this.lifeBar.beginFill(0x999999); // Not sure why this is needed, really.        
+        drawHealthBar() {
+            this.healthBar.clear();
+            this.healthBar.beginFill(PlayingState.HEALTHBAR_COLOR);
+            this.healthBar.drawRoundedRect(0, 0, (this.game.width - 20) * (this.currentHealth / PlayingState.INITIAL_HEALTH), 30, 9);
+            this.healthBar.endFill();
+            this.healthBar.beginFill(0x999999); // Not sure why this is needed, really.        
         }
 
         update() {
+            // Perform physics calculations.
             this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
             this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayer, null, this);
 
@@ -322,7 +332,7 @@ module KetchupAndRaisins {
                 this.movePlayer(KetchupAndRaisins.Movement.Down);
             }
 
-            this.drawLifeBar();
+            this.drawHealthBar(); // Have to continously redraw the health bar like this.
         }
     }
 
