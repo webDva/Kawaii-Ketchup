@@ -42,7 +42,7 @@ module KetchupAndRaisins {
         }
 
         create() {
-            this.game.state.start("GameState");
+            this.game.state.start("PlayingState");
         }
     }
 
@@ -351,9 +351,7 @@ module KetchupAndRaisins {
             super();
         }
 
-        /*
-         * Use this for passing data from the main game state to the lose state. Send arguments to init().
-         */
+        // More than likely, won't be using this. Will instead be sharing data using this.game.state.states["PlayingState"].DATA
         init() {
 
         }
@@ -382,7 +380,7 @@ module KetchupAndRaisins {
              */
             this.game.state.add("BootState", BootState, true);
             this.game.state.add("PreloadState", PreloadState);
-            this.game.state.add("GameState", PlayingState);
+            this.game.state.add("PlayingState", PlayingState);
             this.game.state.add("LosingState", LosingState);
         }
     }
