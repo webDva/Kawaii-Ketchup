@@ -120,6 +120,7 @@ module KetchupAndRaisins {
             }, this);
         }
     }
+
     /*
      * The main game running state
      */
@@ -338,6 +339,28 @@ module KetchupAndRaisins {
             }
 
             this.drawHealthBar(); // Have to continously redraw the health bar like this.
+        }
+    }
+
+    /*
+     * State for handling losing.
+     */
+    export class LosingState extends Phaser.State {
+
+        constructor() {
+            super();
+        }
+
+        preload() {
+
+        }
+
+        create() {
+
+        }
+
+        update() {
+
         }
     }
 
