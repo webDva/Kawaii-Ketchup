@@ -39,19 +39,6 @@ module KetchupAndRaisins {
             // Display the loading screen image
 
             // Load assets
-
-            this.game.load.image('player', 'assets/kawaii_chan.png');
-            this.game.load.image('ketchup', 'assets/ketchup_test.png');
-
-            // explosion graphic
-            let explosionCircle = this.game.add.bitmapData(32, 32);
-            explosionCircle.circle(16, 16, 16, 'rgb(255,255,255');
-            this.game.cache.addBitmapData('explosionCircle', explosionCircle);
-
-            // raisin graphic
-            let raisin = this.game.add.bitmapData(24, 24);
-            raisin.circle(12, 12, 12, 'rgb(54, 27, 79)');
-            this.game.cache.addBitmapData('raisin', raisin);
         }
 
         create() {
@@ -89,12 +76,12 @@ module KetchupAndRaisins {
 
             this.attackTimer = this.game.time.create();
             this.attackTimer.loop(900, () => {
+                // Get the angle between the ketchup bottle and the player.
                 let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.position);
 
+                // Veer toward the player.
                 this.body.velocity.x = Math.cos(angle) * 200;
                 this.body.velocity.y = Math.sin(angle) * 200;
-
-                this.rotation = angle + Math.PI / 2; // Changing the rotation so that it can look better than if the rotation wasn't changed.                
             }, this);
 
             // TTL timer.
@@ -181,7 +168,26 @@ module KetchupAndRaisins {
             super();
         }
 
+        // Load assets that will be used during a game session.
+
+        preload() {
+            // Load player and ketchup art assets
+            this.game.load.image('player', 'assets/kawaii_chan.png');
+            this.game.load.image('ketchup', 'assets/ketchup_test.png');
+
+            // Create an explosion graphic
+            let explosionCircle = this.game.add.bitmapData(32, 32);
+            explosionCircle.circle(16, 16, 16, 'rgb(255,255,255');
+            this.game.cache.addBitmapData('explosionCircle', explosionCircle);
+
+            // Create a raisin graphic
+            let raisin = this.game.add.bitmapData(24, 24);
+            raisin.circle(12, 12, 12, 'rgb(54, 27, 79)');
+            this.game.cache.addBitmapData('raisin', raisin);
+        }
+
         create() {
+            // Start the arcade physics system
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
             // add cursor keys controls
@@ -253,7 +259,7 @@ module KetchupAndRaisins {
         // Class methods for the playing state.
 
         /*
-         * controls player horizontal movement
+         * controls player movement
          */
         movePlayer(direction: KetchupAndRaisins.Movement) {
             // If the player is in mid-air, decrease their movement speed by 10%.
@@ -276,13 +282,19 @@ module KetchupAndRaisins {
             }
         }
 
-        collisionKetchupPlayer(player: Phaser.Sprite, ketchup: KetchupSprite) {
+        /*
+         * Callback for collisions between ketchup bottles and the player.
+         */
+        collisionKetchupPlayerCallback(player: Phaser.Sprite, ketchup: KetchupSprite) {
             ketchup.explode();
             this.currentHealth--;
             this.game.camera.shake(0.01, 250);
         }
 
-        collisionRaisinPlayer(player: Phaser.Sprite, raisin: Phaser.Sprite) {
+        /*
+         * Callback for collisions between raisin collectibles and the player.
+         */
+        collisionRaisinPlayerCallback(player: Phaser.Sprite, raisin: Phaser.Sprite) {
             raisin.kill(); // Remove the raisin when it's been collected.
             this.score += PlayingState.RAISIN_POINT_VALUE; // Increment the score by a raisin point value.
             if (this.currentHealth < PlayingState.INITIAL_HEALTH) { // Increase the player's health, but only if they already aren't at full health.
@@ -303,8 +315,8 @@ module KetchupAndRaisins {
 
         update() {
             // Perform physics calculations.
-            this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayer, null, this);
-            this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayer, null, this);
+            this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayerCallback, null, this);
+            this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayerCallback, null, this);
 
             // Update the score text graphic.
             this.textScore.text = "" + this.score;
@@ -345,6 +357,7 @@ module KetchupAndRaisins {
     }
 }
 
+// Kinda like starting the game.
 window.onload = () => {
     let game = new KetchupAndRaisins.Game();
 };
