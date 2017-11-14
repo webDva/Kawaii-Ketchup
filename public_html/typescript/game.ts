@@ -147,7 +147,7 @@ module KetchupAndRaisins {
         static JUMPING_SPEED: number = PlayingState.MOVEMENT_SPEED + PlayingState.MOVEMENT_SPEED * 0.38;
         static GRAVITY_Y_COMPONENT: number = 400;
 
-        static INITIAL_HEALTH: number = 100;
+        static INITIAL_HEALTH: number = 10;
 
         static KETCHUP_SPAWN_RATE: number = 800; // Number of milliseconds for spawning ketchup bottles.
         static KETCHUP_BEGIN_ATTACK_TIME: number = 500; //Number of milliseconds to wait before attacking the player.
@@ -339,6 +339,10 @@ module KetchupAndRaisins {
             }
 
             this.drawHealthBar(); // Have to continously redraw the health bar like this.
+
+            if (this.currentHealth <= 0) {
+                this.game.state.start("LosingState");
+            }
         }
     }
 
@@ -346,6 +350,9 @@ module KetchupAndRaisins {
      * State for handling losing.
      */
     export class LosingState extends Phaser.State {
+
+        message: string;
+        text: Phaser.Text;
 
         constructor() {
             super();
@@ -361,7 +368,23 @@ module KetchupAndRaisins {
         }
 
         create() {
+            this.message = `Baka! You had a score of ${this.game.state.states['PlayingState'].score}!`
 
+            this.text = this.game.add.text(this.game.world.centerX, this.game.world.centerY, '', {
+                font: '4em "Segoe UI", Impact, sans-serif',
+                fill: '#ff0044',
+                align: 'center'
+            });
+            this.text.anchor.setTo(0.5, 0.5);
+
+            // Display the message character by character by creating a timer for each character.
+            for (let i = 0, totalTime = 0; i < this.message.length; i++) {
+                this.game.time.events.add(totalTime, () => {
+                    this.text.text += this.message[i];
+                }, this);
+                // Depending on the character's index in the message string, display it after a specific delay.
+                totalTime += 150;
+            }
         }
 
         update() {
