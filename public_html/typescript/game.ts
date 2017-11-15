@@ -129,8 +129,8 @@ module KetchupAndRaisins {
         game: Phaser.Game;
 
         player: Phaser.Sprite;
-        currentHealth: number = PlayingState.INITIAL_HEALTH;
-        score: number = 0;
+        currentHealth: number;
+        score: number;
         textScore: Phaser.Text;
 
         ketchupGroup: Phaser.Group;
@@ -163,17 +163,24 @@ module KetchupAndRaisins {
 
         // Unused stuff can go here.
 
-        raisinsCollected: number = 0; // Can use this for calculating a score at the end of the game. Currently unused though.
+        raisinsCollected: number; // Can use this for calculating a score at the end of the game. Currently unused though.
 
         constructor() {
             super();
+        }
+
+        // Resetting class members' values for when this state gets started again.
+        init() {
+            this.score = 0;
+            this.currentHealth = PlayingState.INITIAL_HEALTH
+            this.raisinsCollected = 0;
         }
 
         // Load assets that will be used during a game session.
 
         preload() {
             // Load player and ketchup art assets
-            this.game.load.image('player', 'assets/kawaii_chan.png');
+            this.game.load.image('player', 'assets/wakani.png');
             this.game.load.image('ketchup', 'assets/ketchup_test.png');
 
             // Create an explosion graphic
@@ -340,8 +347,9 @@ module KetchupAndRaisins {
 
             this.drawHealthBar(); // Have to continously redraw the health bar like this.
 
+            // Start the losing state when the player dies and clear everything.
             if (this.currentHealth <= 0) {
-                this.game.state.start("LosingState");
+                this.game.state.start("LosingState", true, true);
             }
         }
     }
@@ -364,18 +372,34 @@ module KetchupAndRaisins {
         }
 
         preload() {
+            let displayBox = this.game.add.bitmapData(400, 200);
+            displayBox.rect(0, 0, 400, 200, 'rgb(255, 87, 51)');
+            this.game.cache.addBitmapData('displayBox', displayBox);
 
+            this.game.load.image('kawaii', 'assets/prototype_kawaii.png');
         }
 
         create() {
+            let kawaiiMessage = this.game.add.sprite(this.game.world.centerX / 2, this.game.world.centerY, 'kawaii');
+            kawaiiMessage.anchor.setTo(0.5, 0.5);
+
+            let displayBox = this.game.add.sprite(kawaiiMessage.width + 200, 0, this.game.cache.getBitmapData('displayBox'));
+            displayBox.anchor.setTo(0.5, 0.5);
+            kawaiiMessage.addChild(displayBox);
+
             this.message = `Baka! You had a score of ${this.game.state.states['PlayingState'].score}!`
 
-            this.text = this.game.add.text(this.game.world.centerX, this.game.world.centerY, '', {
-                font: '4em "Segoe UI", Impact, sans-serif',
-                fill: '#ff0044',
-                align: 'center'
-            });
+            this.text = this.game.add.text(0,
+                0, '', {
+                    font: '4em "Segoe UI", Impact, sans-serif',
+                    fill: '#4F1900',
+                    align: 'center',
+                    wordWrap: true,
+                    wordWrapWidth: displayBox.width
+                });
             this.text.anchor.setTo(0.5, 0.5);
+
+            displayBox.addChild(this.text);
 
             // Display the message character by character by creating a timer for each character.
             for (let i = 0, totalTime = 0; i < this.message.length; i++) {
@@ -385,6 +409,18 @@ module KetchupAndRaisins {
                 // Depending on the character's index in the message string, display it after a specific delay.
                 totalTime += 150;
             }
+
+            let restartButton = this.game.add.text(this.game.world.centerX, this.game.world.height - 10, "Restart",
+                {
+                    font: "6em 'Segoe UI', Impact, sans-serif",
+                    fill: "#ffffff",
+                    align: "center"
+                });
+            restartButton.anchor.setTo(0.5, 1);
+            restartButton.inputEnabled = true;
+            restartButton.events.onInputDown.add(() => {
+                this.game.state.start("PlayingState", true, true);
+            }, this);
         }
 
         update() {
