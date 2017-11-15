@@ -70,8 +70,6 @@ module KetchupAndRaisins {
             this.outOfBoundsKill = true;
             this.anchor.setTo(0.5, 0.5); // Set the center of the ketchup bottles.
 
-            this.scale.setTo(1.5, 1.5); // Increase the size of the ketchup bottles so that the player can more easily see them.
-
             // Timers for ketchup actions.
 
             this.attackTimer = this.game.time.create();
@@ -180,8 +178,8 @@ module KetchupAndRaisins {
 
         preload() {
             // Load player and ketchup art assets
-            this.game.load.image('player', 'assets/wakani.png');
-            this.game.load.image('ketchup', 'assets/ketchup_test.png');
+            this.game.load.image('player', 'assets/player.png');
+            this.game.load.image('ketchup', 'assets/ketchup.png');
 
             // Create an explosion graphic
             let explosionCircle = this.game.add.bitmapData(32, 32);
@@ -372,18 +370,18 @@ module KetchupAndRaisins {
         }
 
         preload() {
-            let displayBox = this.game.add.bitmapData(400, 200);
+            let displayBox = this.game.add.bitmapData(400, 220);
             displayBox.rect(0, 0, 400, 200, 'rgb(255, 87, 51)');
             this.game.cache.addBitmapData('displayBox', displayBox);
 
-            this.game.load.image('kawaii', 'assets/prototype_kawaii.png');
+            this.game.load.image('kawaii', 'assets/angry_kawaii.png');
         }
 
         create() {
             let kawaiiMessage = this.game.add.sprite(this.game.world.centerX / 2, this.game.world.centerY, 'kawaii');
             kawaiiMessage.anchor.setTo(0.5, 0.5);
 
-            let displayBox = this.game.add.sprite(kawaiiMessage.width + 200, 0, this.game.cache.getBitmapData('displayBox'));
+            let displayBox = this.game.add.sprite(kawaiiMessage.width + 100, 0, this.game.cache.getBitmapData('displayBox'));
             displayBox.anchor.setTo(0.5, 0.5);
             kawaiiMessage.addChild(displayBox);
 
