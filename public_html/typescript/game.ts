@@ -65,6 +65,7 @@ module KetchupAndRaisins {
         constructor(game: Phaser.Game, x: number, y: number, key: string) {
             super(game, x, y, key);
 
+            this.scale.setTo(0.3, 0.3);
             this.game.physics.arcade.enable(this);
             this.checkWorldBounds = true;
             this.outOfBoundsKill = true;
@@ -179,6 +180,8 @@ module KetchupAndRaisins {
         preload() {
             // Load player and ketchup art assets
             this.game.load.image('player', 'assets/player.png');
+            this.game.load.spritesheet('player_spritesheet', 'assets/player_spritesheet.png', 842, 1191, 4);
+            this.game.load.spritesheet('run_left_spritesheet', 'assets/run_left_spritesheet.png', 842, 1191, 4);
             this.game.load.image('ketchup', 'assets/ketchup.png');
 
             // Create an explosion graphic
@@ -200,12 +203,26 @@ module KetchupAndRaisins {
             this.cursorKeys = this.game.input.keyboard.createCursorKeys();
 
             // Add and configure the player sprite.
-            this.player = this.game.add.sprite(100, this.game.world.centerY, 'player');
-            this.player.scale.setTo(2, 2); // Increase the player's sprite size so that it can be more easily seen.
+            this.player = this.game.add.sprite(100, this.game.world.centerY, 'player_spritesheet', 0);
+            this.player.scale.setTo(0.1, 0.1);
             this.game.physics.arcade.enable(this.player);
             this.player.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_COMPONENT);
             this.player.body.collideWorldBounds = true;
             this.player.anchor.setTo(0.5, 0.5);
+
+            // right run animation
+            let runAnimation = this.player.animations.add('runRight', null, 10);
+            runAnimation.onComplete.add(() => {
+                this.player.loadTexture('player_spritesheet'); // reset to the original if haven't done so already
+                this.player.frame = 0;
+            }, this);
+
+            // run left animation
+            let runLeftAnimation = this.player.animations.add('runLeft', null, 10);
+            runLeftAnimation.onComplete.add(() => {
+                this.player.loadTexture('run_left_spritesheet'); // change to the left-facing texture
+                this.player.frame = 0;
+            });
 
             // Create the Groups that will hold the ketchup bottles and raisin collectibles.
             this.ketchupGroup = this.game.add.group();
@@ -276,8 +293,10 @@ module KetchupAndRaisins {
 
             if (direction === KetchupAndRaisins.Movement.Left) {
                 this.player.body.velocity.x = -PlayingState.MOVEMENT_SPEED - speedModifier;
+                this.player.animations.play('runLeft');
             } else if (direction === KetchupAndRaisins.Movement.Right) {
                 this.player.body.velocity.x = PlayingState.MOVEMENT_SPEED - speedModifier;
+                this.player.animations.play('runRight');
             } else if (direction === KetchupAndRaisins.Movement.Up) {
                 // checks to see if the player is on the ground, then jumps and plays jumping sound
                 if (this.player.body.onFloor()) {
