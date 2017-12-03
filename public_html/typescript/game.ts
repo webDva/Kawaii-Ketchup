@@ -121,6 +121,36 @@ module KetchupAndRaisins {
         }
     }
 
+    export enum FoodTypes {
+        Raisin,
+        Onion,
+        Bacon
+    }
+
+    export class FoodSprite extends Phaser.Sprite {
+
+        foodType: FoodTypes;
+
+        constructor(game: Phaser.Game, x: number, y: number, key: string) {
+            super(game, x, y, key);
+
+            this.game.physics.arcade.enable(this);
+
+            let randomType = this.game.rnd.integerInRange(0, 2);
+            if (randomType === FoodTypes.Raisin) {
+                this.loadTexture('raisin');
+            } else if (randomType === FoodTypes.Onion) {
+                this.loadTexture('onion');
+            } else if (randomType === FoodTypes.Bacon) {
+                this.loadTexture('bacon');
+            }
+
+            this.scale.setTo(0.25, 0.25);
+
+            this.game.stage.addChild(this);
+        }
+    }
+
     /*
      * The main game running state
      */
@@ -134,7 +164,7 @@ module KetchupAndRaisins {
         textScore: Phaser.Text;
 
         ketchupGroup: Phaser.Group;
-        raisinGroup: Phaser.Group;
+        foodCollectibleGroup: Phaser.Group;
 
         healthBar: Phaser.Graphics;
 
@@ -163,7 +193,7 @@ module KetchupAndRaisins {
 
         // Unused stuff can go here.
 
-        raisinsCollected: number; // Can use this for calculating a score at the end of the game. Currently unused though.
+        foodSpritesCollected: number; // Can use this for calculating a score at the end of the game. Currently unused though.
 
         constructor() {
             super();
@@ -173,7 +203,7 @@ module KetchupAndRaisins {
         init() {
             this.score = 0;
             this.currentHealth = PlayingState.INITIAL_HEALTH
-            this.raisinsCollected = 0;
+            this.foodSpritesCollected = 0;
         }
 
         // Load assets that will be used during a game session.
@@ -184,8 +214,12 @@ module KetchupAndRaisins {
             this.game.load.spritesheet('player_spritesheet', 'assets/player_spritesheet.png', 842, 1191, 4);
             this.game.load.spritesheet('run_left_spritesheet', 'assets/run_left_spritesheet.png', 842, 1191, 4);
             this.game.load.image('ketchup', 'assets/ketchup.png'); // ketchup bottle
-            this.game.load.image('explosion', 'assets/explosion.png'); // load the explosion graphic         
-            this.game.load.image('raisin', 'assets/raisin.png'); // load the raisin graphic
+            this.game.load.image('explosion', 'assets/explosion.png'); // load the explosion graphic  
+
+            // Load the food art assets       
+            this.game.load.image('raisin', 'assets/raisin.png');
+            this.game.load.image('onion', 'assets/onion.png');
+            this.game.load.image('bacon', 'assets/bacon.png');
         }
 
         create() {
@@ -217,9 +251,9 @@ module KetchupAndRaisins {
                 this.player.frame = 0;
             });
 
-            // Create the Groups that will hold the ketchup bottles and raisin collectibles.
+            // Create the Groups that will hold the ketchup bottles and collectibles.
             this.ketchupGroup = this.game.add.group();
-            this.raisinGroup = this.game.add.group();
+            this.foodCollectibleGroup = this.game.add.group();
 
             // A spawn timer for creating ketchup bottles.
             let ketchupSpawnTimer = this.game.time.create();
@@ -238,16 +272,11 @@ module KetchupAndRaisins {
                 align: "center"
             });
 
-            // Responsible for creating new raisin collectibles.
-            let raisinSpawnTimer = this.game.time.create();
-            raisinSpawnTimer.loop(1500, () => {
-                let singleRaisin = this.raisinGroup.create(
-                    this.game.rnd.integerInRange(0, this.game.width - 24),
-                    this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24),
-                    'raisin');
-
-                this.game.physics.arcade.enable(singleRaisin);
-                singleRaisin.scale.setTo(0.25, 0.25);
+            // Responsible for creating new collectibles.
+            let foodSpawnTimer = this.game.time.create();
+            foodSpawnTimer.loop(1500, () => {
+                let aFoodSprite = new FoodSprite(this.game, this.game.rnd.integerInRange(0, this.game.width - 24), this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24), '__default');
+                this.foodCollectibleGroup.add(aFoodSprite);
             }, this);
 
             // Create the long health bar that gets displayed at the top of the screen.
@@ -268,7 +297,7 @@ module KetchupAndRaisins {
 
             // Start all the timers.
             ketchupSpawnTimer.start();
-            raisinSpawnTimer.start();
+            foodSpawnTimer.start();
             dyingHealthTimer.start();
             calculateScoreTimer.start();
         }
@@ -311,10 +340,10 @@ module KetchupAndRaisins {
         }
 
         /*
-         * Callback for collisions between raisin collectibles and the player.
+         * Callback for collisions between FoodSprite collectibles and the player.
          */
-        collisionRaisinPlayerCallback(player: Phaser.Sprite, raisin: Phaser.Sprite) {
-            raisin.kill(); // Remove the raisin when it's been collected.
+        collisionFoodCollectiblePlayerCallback(player: Phaser.Sprite, food: Phaser.Sprite) {
+            food.kill(); // Remove the food when it's been collected.
             this.score += PlayingState.RAISIN_POINT_VALUE; // Increment the score by a raisin point value.
             if (this.currentHealth < PlayingState.INITIAL_HEALTH) { // Increase the player's health, but only if they already aren't at full health.
                 this.currentHealth += PlayingState.HEAL_AMOUNT;
@@ -335,7 +364,7 @@ module KetchupAndRaisins {
         update() {
             // Perform physics calculations.
             this.game.physics.arcade.collide(this.player, this.ketchupGroup, this.collisionKetchupPlayerCallback, null, this);
-            this.game.physics.arcade.overlap(this.player, this.raisinGroup, this.collisionRaisinPlayerCallback, null, this);
+            this.game.physics.arcade.overlap(this.player, this.foodCollectibleGroup, this.collisionFoodCollectiblePlayerCallback, null, this);
 
             // Update the score text graphic.
             this.textScore.text = "" + this.score;
@@ -380,7 +409,8 @@ module KetchupAndRaisins {
             "Don't be sad!",
             "Cereal! Cereal! I like cereal!",
             "Eat food or you'll become food.",
-            "Remember the times when you were happy and how happy it made you feel."
+            "Remember the times when you were happy and how happy it made you feel.",
+            "おまえはもうしんでいる。。。"
         ];
 
         constructor() {
