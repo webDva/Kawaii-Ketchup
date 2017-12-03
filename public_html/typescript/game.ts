@@ -372,6 +372,16 @@ module KetchupAndRaisins {
 
         message: string;
         text: Phaser.Text;
+        scoreText: Phaser.Text;
+
+        phrasesOfSoulOfWaifu: string[] = [
+            "Bacon's on the to-do list!",
+            "You don't have to be sad...",
+            "Don't be sad!",
+            "Cereal! Cereal! I like cereal!",
+            "Eat food or you'll become food.",
+            "Remember the times when you were happy and how happy it made you feel."
+        ];
 
         constructor() {
             super();
@@ -398,7 +408,7 @@ module KetchupAndRaisins {
             displayBox.anchor.setTo(0.5, 0.5);
             kawaiiMessage.addChild(displayBox);
 
-            this.message = `Baka! You had a score of ${this.game.state.states['PlayingState'].score}!`
+            this.message = this.phrasesOfSoulOfWaifu[this.game.rnd.integerInRange(0, this.phrasesOfSoulOfWaifu.length - 1)];
 
             this.text = this.game.add.text(0,
                 0, '', {
@@ -409,6 +419,18 @@ module KetchupAndRaisins {
                     wordWrapWidth: displayBox.width
                 });
             this.text.anchor.setTo(0.5, 0.5);
+
+            this.scoreText = this.game.add.text(
+                0,
+                displayBox.top, '', {
+                    font: '8em "Segoe UI", Impact, sans-serif',
+                    fill: '#ffffff',
+                    align: 'center'
+                }
+            );
+            this.scoreText.anchor.setTo(0.5, 1);
+            this.scoreText.text = `Score: ${this.game.state.states['PlayingState'].score}`;
+            displayBox.addChild(this.scoreText);
 
             displayBox.addChild(this.text);
 
