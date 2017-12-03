@@ -110,10 +110,11 @@ module KetchupAndRaisins {
             this.attackTimer.stop();
 
             // Change the texture of the ketchup bottle to an explosion.
-            this.loadTexture(this.game.cache.getBitmapData('explosionCircle'));
+            this.loadTexture('explosion');
+            this.scale.setTo(0.01, 0.01); // then set its size to zero
 
             // An animation tween for creating an explosion effect. When done animating, kills the ketchup sprite.
-            let tween = this.game.add.tween(this.scale).to({x: 5, y: 5}, 300, "Linear", true);
+            let tween = this.game.add.tween(this.scale).to({x: 1, y: 1}, 300, "Linear", true);
             tween.onComplete.add(() => {
                 this.kill();
             }, this);
@@ -179,20 +180,12 @@ module KetchupAndRaisins {
 
         preload() {
             // Load player and ketchup art assets
-            this.game.load.image('player', 'assets/player.png');
+            this.game.load.image('player', 'assets/player.png'); // the player avatar
             this.game.load.spritesheet('player_spritesheet', 'assets/player_spritesheet.png', 842, 1191, 4);
             this.game.load.spritesheet('run_left_spritesheet', 'assets/run_left_spritesheet.png', 842, 1191, 4);
-            this.game.load.image('ketchup', 'assets/ketchup.png');
-
-            // Create an explosion graphic
-            let explosionCircle = this.game.add.bitmapData(32, 32);
-            explosionCircle.circle(16, 16, 16, 'rgb(255,255,255');
-            this.game.cache.addBitmapData('explosionCircle', explosionCircle);
-
-            // Create a raisin graphic
-            let raisin = this.game.add.bitmapData(24, 24);
-            raisin.circle(12, 12, 12, 'rgb(54, 27, 79)');
-            this.game.cache.addBitmapData('raisin', raisin);
+            this.game.load.image('ketchup', 'assets/ketchup.png'); // ketchup bottle
+            this.game.load.image('explosion', 'assets/explosion.png'); // load the explosion graphic         
+            this.game.load.image('raisin', 'assets/raisin.png'); // load the raisin graphic
         }
 
         create() {
@@ -251,9 +244,10 @@ module KetchupAndRaisins {
                 let singleRaisin = this.raisinGroup.create(
                     this.game.rnd.integerInRange(0, this.game.width - 24),
                     this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24),
-                    this.game.cache.getBitmapData('raisin'));
+                    'raisin');
 
                 this.game.physics.arcade.enable(singleRaisin);
+                singleRaisin.scale.setTo(0.25, 0.25);
             }, this);
 
             // Create the long health bar that gets displayed at the top of the screen.
