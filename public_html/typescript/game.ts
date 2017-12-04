@@ -428,9 +428,15 @@ module KetchupAndRaisins {
             this.game.cache.addBitmapData('displayBox', displayBox);
 
             this.game.load.image('kawaii', 'assets/angry_kawaii.png');
+
+            this.game.load.audio('lose_music', 'assets/lose_song.wav');
         }
 
         create() {
+            let endMusic = this.game.add.audio('lose_music');
+            endMusic.loop = true;
+            endMusic.play();
+
             let kawaiiMessage = this.game.add.sprite(this.game.world.centerX / 2, this.game.world.centerY, 'kawaii');
             kawaiiMessage.anchor.setTo(0.5, 0.5);
 
