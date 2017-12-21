@@ -182,7 +182,7 @@ module KetchupAndRaisins {
         static HEALTH_DECREASE_AMOUNT: number = 1; // How much health to decrease per tick.
 
         static HEALTHBAR_COLOR: number = 0xC70039;
-        static SCORE_TEXT_COLOR: string = "#2FDF00";
+        static SCORE_TEXT_COLOR: string = "#004401";
 
         // Unused stuff can go here.
 
@@ -385,6 +385,25 @@ module KetchupAndRaisins {
          * Callback for collisions between FoodSprite collectibles and the player.
          */
         collisionFoodCollectiblePlayerCallback(player: Phaser.Sprite, food: Phaser.Sprite) {
+            // text for raisin tween
+            let text: Phaser.Text = this.game.add.text(
+                food.x + food.width / 2,
+                food.y - food.height / 2,
+                '+ ' + PlayingState.RAISIN_POINT_VALUE,
+                {
+                    font: '3em Bookman',
+                    fontWeight: '350',
+                    fill: PlayingState.SCORE_TEXT_COLOR
+                }
+            );
+
+            // tweens for fading and transforming text pop up
+            this.game.add.tween(text).to({y: text.y - 50}, 500, null, true);
+            let secondTween = this.game.add.tween(text).to({alpha: 0}, 500, null, true);
+            secondTween.onComplete.add(() => {
+                text.kill();
+            }, this);
+
             food.kill(); // Remove the food when it's been collected.
             this.score += PlayingState.RAISIN_POINT_VALUE; // Increment the score by a raisin point value.
             if (this.currentHealth < PlayingState.INITIAL_HEALTH) { // Increase the player's health, but only if they already aren't at full health.
