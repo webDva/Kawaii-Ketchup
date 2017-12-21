@@ -198,7 +198,7 @@ module KetchupAndRaisins {
             this.currentHealth = PlayingState.INITIAL_HEALTH
             this.foodSpritesCollected = 0;
 
-            this.game.stage.backgroundColor = "#1e97d8";
+            this.game.stage.backgroundColor = "#7691D8";
         }
 
         // Load assets that will be used during a game session.
@@ -491,7 +491,7 @@ module KetchupAndRaisins {
         }
 
         create() {
-            this.game.stage.backgroundColor = "#171A47";
+            this.game.stage.backgroundColor = "#5E87DE";
 
             let endMusic = this.game.add.audio('lose_music');
             endMusic.loop = true;
