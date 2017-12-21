@@ -13,8 +13,6 @@ module KetchupAndRaisins {
         init() {
             // Set scale using ScaleManager
             this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            // Set background color
-            this.game.stage.backgroundColor = "#1e97d8";
         }
 
         preload() {
@@ -121,31 +119,14 @@ module KetchupAndRaisins {
         }
     }
 
-    export enum FoodTypes {
-        Raisin,
-        Onion,
-        Bacon
-    }
-
-    export class FoodSprite extends Phaser.Sprite {
-
-        foodType: FoodTypes;
-
+    export class RaisinSprite extends Phaser.Sprite {
         constructor(game: Phaser.Game, x: number, y: number, key: string) {
             super(game, x, y, key);
 
             this.game.physics.arcade.enable(this);
 
-            let randomType = this.game.rnd.integerInRange(0, 2);
-            if (randomType === FoodTypes.Raisin) {
-                this.loadTexture('raisin');
-            } else if (randomType === FoodTypes.Onion) {
-                this.loadTexture('onion');
-            } else if (randomType === FoodTypes.Bacon) {
-                this.loadTexture('bacon');
-            }
-
-            this.scale.setTo(0.25, 0.25);
+            // Good size!
+            this.scale.setTo(0.5, 0.5);
 
             this.game.stage.addChild(this);
         }
@@ -232,8 +213,6 @@ module KetchupAndRaisins {
 
             // Load the food art assets       
             this.game.load.image('raisin', 'assets/raisin.png');
-            this.game.load.image('onion', 'assets/onion.png');
-            this.game.load.image('bacon', 'assets/bacon.png');
 
             this.game.load.image("leftButton", "assets/leftarrow.png");
             this.game.load.image("rightButton", "assets/rightarrow.png");
@@ -294,7 +273,7 @@ module KetchupAndRaisins {
             // Responsible for creating new collectibles.
             let foodSpawnTimer = this.game.time.create();
             foodSpawnTimer.loop(1500, () => {
-                let aFoodSprite = new FoodSprite(this.game, this.game.rnd.integerInRange(0, this.game.width - 24), this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24), '__default');
+                let aFoodSprite = new RaisinSprite(this.game, this.game.rnd.integerInRange(0, this.game.width - 24), this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24), 'raisin');
                 this.foodCollectibleGroup.add(aFoodSprite);
             }, this);
 
@@ -472,8 +451,9 @@ module KetchupAndRaisins {
             "Don't be sad!",
             "Cereal! Cereal! I like cereal!",
             "Eat food or you'll become food.",
-            "Remember the times when you were happy and how happy it made you feel.",
-            "おまえはもうしんでいる。。。"
+            "Remember the times when you felt kawaii and then remember how kawaii it made you feel.",
+            "Omae wa mou shindeiru...",
+            "Focus, baka!"
         ];
 
         constructor() {
@@ -517,13 +497,14 @@ module KetchupAndRaisins {
             this.scoreText = this.game.add.text(
                 this.game.world.centerX,
                 0, '', {
-                    font: '8em "Segoe UI", Impact, sans-serif',
+                    font: '4em Impact',
+                    fontWeight: 'bolder',
                     fill: '#ffffff',
                     align: 'center'
                 }
             );
             this.scoreText.anchor.setTo(0.5, 0);
-            this.scoreText.text = `Score: ${this.game.state.states['PlayingState'].score}`;
+            this.scoreText.text = `score\n${this.game.state.states['PlayingState'].score}`;
 
             // Display the message character by character by creating a timer for each character.
             for (let i = 0, totalTime = 0; i < this.message.length; i++) {
