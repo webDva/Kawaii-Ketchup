@@ -466,7 +466,7 @@ module KetchupAndRaisins {
         }
 
         preload() {
-            this.game.load.image('kawaii', 'assets/kawaii_eyes.png');
+            this.game.load.image('kawaii', 'assets/kawaiichan.png');
 
             this.game.load.audio('lose_music', 'assets/lose_song.wav');
         }
