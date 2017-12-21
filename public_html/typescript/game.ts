@@ -216,6 +216,8 @@ module KetchupAndRaisins {
             this.score = 0;
             this.currentHealth = PlayingState.INITIAL_HEALTH
             this.foodSpritesCollected = 0;
+
+            this.game.stage.backgroundColor = "#1e97d8";
         }
 
         // Load assets that will be used during a game session.
@@ -295,10 +297,6 @@ module KetchupAndRaisins {
                 let aFoodSprite = new FoodSprite(this.game, this.game.rnd.integerInRange(0, this.game.width - 24), this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24), '__default');
                 this.foodCollectibleGroup.add(aFoodSprite);
             }, this);
-
-            // add gamepad controls support for XBOX 360 controller
-            this.game.input.gamepad.start();
-            this.pad1 = this.game.input.gamepad.pad1;
 
             // Create the long health bar that gets displayed at the top of the screen.
             this.healthBar = this.game.add.graphics(10, 10);
@@ -488,33 +486,28 @@ module KetchupAndRaisins {
         }
 
         preload() {
-            let displayBox = this.game.add.bitmapData(400, 220);
-            displayBox.rect(0, 0, 400, 200, 'rgb(255, 87, 51)');
-            this.game.cache.addBitmapData('displayBox', displayBox);
-
             this.game.load.image('kawaii', 'assets/kawaii_eyes.png');
 
             this.game.load.audio('lose_music', 'assets/lose_song.wav');
         }
 
         create() {
+            this.game.stage.backgroundColor = "#171A47";
+
             let endMusic = this.game.add.audio('lose_music');
             endMusic.loop = true;
             endMusic.play();
 
-            let kawaiiMessage = this.game.add.sprite(this.game.world.centerX / 2, this.game.world.centerY, 'kawaii');
-            kawaiiMessage.anchor.setTo(0.5, 0.5);
-
-            let displayBox = this.game.add.sprite(kawaiiMessage.width + 100, 0, this.game.cache.getBitmapData('displayBox'));
-            displayBox.anchor.setTo(0.5, 0.5);
-            kawaiiMessage.addChild(displayBox);
+            let kChanFace = this.game.add.sprite(this.game.world.centerX / 4, this.game.world.centerY, 'kawaii');
+            kChanFace.anchor.setTo(0.5, 0.5);
+            kChanFace.scale.setTo(0.5, 0.5);
 
             this.message = this.phrasesOfSoulOfWaifu[this.game.rnd.integerInRange(0, this.phrasesOfSoulOfWaifu.length - 1)];
 
-            this.text = this.game.add.text(0,
-                0, '', {
+            this.text = this.game.add.text(this.game.world.centerX,
+                this.game.world.centerY, '', {
                     font: '4em "Segoe UI", Impact, sans-serif',
-                    fill: '#4F1900',
+                    fill: '#ffffff',
                     align: 'center',
                     wordWrap: true,
                     wordWrapWidth: 400
@@ -522,18 +515,15 @@ module KetchupAndRaisins {
             this.text.anchor.setTo(0.5, 0.5);
 
             this.scoreText = this.game.add.text(
-                0,
-                displayBox.top, '', {
+                this.game.world.centerX,
+                0, '', {
                     font: '8em "Segoe UI", Impact, sans-serif',
                     fill: '#ffffff',
                     align: 'center'
                 }
             );
-            this.scoreText.anchor.setTo(0.5, 1);
+            this.scoreText.anchor.setTo(0.5, 0);
             this.scoreText.text = `Score: ${this.game.state.states['PlayingState'].score}`;
-            displayBox.addChild(this.scoreText);
-
-            displayBox.addChild(this.text);
 
             // Display the message character by character by creating a timer for each character.
             for (let i = 0, totalTime = 0; i < this.message.length; i++) {
