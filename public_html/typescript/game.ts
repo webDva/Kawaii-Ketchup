@@ -171,6 +171,18 @@ module KetchupAndRaisins {
         // keyboard cursor key controls
         cursorKeys: Phaser.CursorKeys;
 
+        // onscreen controls sprites
+        aButton: Phaser.Button;
+        bButton: Phaser.Button;
+        leftButton: Phaser.Button;
+        rightButton: Phaser.Button;
+
+        // booleans for button holding
+        isAButtonPressed: boolean;
+        isBButtonPressed: boolean;
+        isLeftButtonPressed: boolean;
+        isRightButtonPressed: boolean;
+
         // A bunch of constant values.
 
         static MOVEMENT_SPEED: number = 365;
@@ -220,6 +232,11 @@ module KetchupAndRaisins {
             this.game.load.image('raisin', 'assets/raisin.png');
             this.game.load.image('onion', 'assets/onion.png');
             this.game.load.image('bacon', 'assets/bacon.png');
+
+            this.game.load.image("leftButton", "assets/leftarrow.png");
+            this.game.load.image("rightButton", "assets/rightarrow.png");
+            this.game.load.image('aButton', 'assets/abutton.png');
+            this.game.load.image('bButton', 'assets/bbutton.png');
         }
 
         create() {
@@ -279,9 +296,57 @@ module KetchupAndRaisins {
                 this.foodCollectibleGroup.add(aFoodSprite);
             }, this);
 
+            // add gamepad controls support for XBOX 360 controller
+            this.game.input.gamepad.start();
+            this.pad1 = this.game.input.gamepad.pad1;
+
             // Create the long health bar that gets displayed at the top of the screen.
             this.healthBar = this.game.add.graphics(10, 10);
             this.drawHealthBar();
+
+            // add oncscreen controls to the screen, but only if touch is available
+            if (this.game.device.touch) {
+                this.aButton = this.game.add.button(500, 390, "aButton", null, this);
+                this.aButton.fixedToCamera = true; // stay in one place like a UI button
+                this.aButton.alpha = 0.4; // set transparency
+                this.aButton.events.onInputDown.add(() => {
+                    this.isAButtonPressed = true;
+                });
+                this.aButton.events.onInputUp.add(() => {
+                    this.isAButtonPressed = false;
+                });
+
+                this.bButton = this.game.add.button(630, 390, "bButton", null, this);
+                this.bButton.fixedToCamera = true; // stay in one place like a UI button
+                this.bButton.alpha = 0.4; // set transparency
+                this.bButton.events.onInputDown.add(() => {
+                    this.isBButtonPressed = true;
+                });
+                this.bButton.events.onInputUp.add(() => {
+                    this.isBButtonPressed = false;
+                });
+
+                this.leftButton = this.game.add.button(40, 380, "leftButton", null, this);
+                this.leftButton.fixedToCamera = true;
+                this.leftButton.alpha = 0.4;
+                this.leftButton.events.onInputDown.add(() => {
+                    this.isLeftButtonPressed = true;
+                });
+                this.leftButton.events.onInputUp.add(() => {
+                    this.isLeftButtonPressed = false;
+                });
+
+                this.rightButton = this.game.add.button(300, 380, "rightButton", null, this);
+                this.rightButton.anchor.x = 1;
+                this.rightButton.fixedToCamera = true;
+                this.rightButton.alpha = 0.4;
+                this.rightButton.events.onInputDown.add(() => {
+                    this.isRightButtonPressed = true;
+                });
+                this.rightButton.events.onInputUp.add(() => {
+                    this.isRightButtonPressed = false;
+                });
+            }
 
             // Decreases the player's health over time.
             let dyingHealthTimer = this.game.time.create();
@@ -373,15 +438,15 @@ module KetchupAndRaisins {
             this.player.body.velocity.x = 0;
 
             // processing cursor keys or onscreen controls input to move the player avatar
-            if (this.cursorKeys.left.isDown) {
+            if (this.cursorKeys.left.isDown || this.isLeftButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Left);
             }
-            else if (this.cursorKeys.right.isDown) {
+            else if (this.cursorKeys.right.isDown || this.isRightButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Right);
             }
-            if (this.cursorKeys.up.isDown) {
+            if (this.cursorKeys.up.isDown || this.isAButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Up);
-            } else if (this.cursorKeys.down.isDown) {
+            } else if (this.cursorKeys.down.isDown || this.isBButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Down);
             }
 
@@ -427,7 +492,7 @@ module KetchupAndRaisins {
             displayBox.rect(0, 0, 400, 200, 'rgb(255, 87, 51)');
             this.game.cache.addBitmapData('displayBox', displayBox);
 
-            this.game.load.image('kawaii', 'assets/angry_kawaii.png');
+            this.game.load.image('kawaii', 'assets/kawaii_eyes.png');
 
             this.game.load.audio('lose_music', 'assets/lose_song.wav');
         }
@@ -452,7 +517,7 @@ module KetchupAndRaisins {
                     fill: '#4F1900',
                     align: 'center',
                     wordWrap: true,
-                    wordWrapWidth: displayBox.width
+                    wordWrapWidth: 400
                 });
             this.text.anchor.setTo(0.5, 0.5);
 
