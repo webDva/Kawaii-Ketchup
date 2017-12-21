@@ -484,15 +484,16 @@ module KetchupAndRaisins {
 
             this.message = this.phrasesOfSoulOfWaifu[this.game.rnd.integerInRange(0, this.phrasesOfSoulOfWaifu.length - 1)];
 
-            this.text = this.game.add.text(this.game.world.centerX,
+            this.text = this.game.add.text(186,
                 this.game.world.centerY, '', {
-                    font: '4em "Segoe UI", Impact, sans-serif',
+                    font: '4em "Comic Sans MS"',
+                    fontWeight: 'bold',
                     fill: '#ffffff',
                     align: 'center',
                     wordWrap: true,
-                    wordWrapWidth: 400
+                    wordWrapWidth: this.game.world.width - 186
                 });
-            this.text.anchor.setTo(0.5, 0.5);
+            this.text.anchor.setTo(0, 0.5);
 
             this.scoreText = this.game.add.text(
                 this.game.world.centerX,
