@@ -164,6 +164,10 @@ module KetchupAndRaisins {
         isLeftButtonPressed: boolean;
         isRightButtonPressed: boolean;
 
+        watermark: Phaser.Text; // text for watermark for demo version
+
+        collectRaisinSound: Phaser.Sound;
+
         // A bunch of constant values.
 
         static MOVEMENT_SPEED: number = 365;
@@ -218,11 +222,16 @@ module KetchupAndRaisins {
             this.game.load.image("rightButton", "assets/rightarrow.png");
             this.game.load.image('aButton', 'assets/abutton.png');
             this.game.load.image('bButton', 'assets/bbutton.png');
+
+            this.game.load.audio("raisinCollectSound", "assets/raisinCollect.wav");
         }
 
         create() {
             // Start the arcade physics system
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+            // add sounds
+            this.collectRaisinSound = this.game.add.audio('raisinCollectSound');
 
             // add cursor keys controls
             this.cursorKeys = this.game.input.keyboard.createCursorKeys();
@@ -409,6 +418,9 @@ module KetchupAndRaisins {
             if (this.currentHealth < PlayingState.INITIAL_HEALTH) { // Increase the player's health, but only if they already aren't at full health.
                 this.currentHealth += PlayingState.HEAL_AMOUNT;
             }
+
+            // play the raisin collect sound
+            this.collectRaisinSound.play();
         }
 
         /*
