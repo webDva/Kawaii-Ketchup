@@ -167,6 +167,7 @@ module KetchupAndRaisins {
         watermark: Phaser.Text; // text for watermark for demo version
 
         collectRaisinSound: Phaser.Sound;
+        ketchupHitSound: Phaser.Sound;
 
         // A bunch of constant values.
 
@@ -224,6 +225,7 @@ module KetchupAndRaisins {
             this.game.load.image('bButton', 'assets/bbutton.png');
 
             this.game.load.audio("raisinCollectSound", "assets/raisinCollect.wav");
+            this.game.load.audio('ketchupHitSound', 'assets/ketchupHit.wav');
         }
 
         create() {
@@ -232,6 +234,7 @@ module KetchupAndRaisins {
 
             // add sounds
             this.collectRaisinSound = this.game.add.audio('raisinCollectSound');
+            this.ketchupHitSound = this.game.add.audio('ketchupHitSound');
 
             // add cursor keys controls
             this.cursorKeys = this.game.input.keyboard.createCursorKeys();
@@ -388,6 +391,7 @@ module KetchupAndRaisins {
             ketchup.explode();
             this.currentHealth--;
             this.game.camera.shake(0.01, 250);
+            this.ketchupHitSound.play();
         }
 
         /*
