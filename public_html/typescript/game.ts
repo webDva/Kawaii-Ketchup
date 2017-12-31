@@ -40,7 +40,7 @@ module KetchupAndRaisins {
         }
 
         create() {
-            this.game.state.start("PlayingState");
+            this.game.state.start("MainMenuState");
         }
     }
 
@@ -129,6 +129,36 @@ module KetchupAndRaisins {
             this.scale.setTo(0.5, 0.5);
 
             this.game.stage.addChild(this);
+        }
+    }
+
+    /*
+     * Main menu state
+     */
+    export class MainMenuState extends Phaser.State {
+
+
+
+        constructor() {
+            super();
+        }
+
+        init() {
+
+        }
+
+        preload() {
+            this.game.load.spritesheet('startButton', 'assets/startButton.png', 640, 400);
+        }
+
+        create() {
+            let startButton = this.game.add.button(this.game.world.centerX, 100, 'startButton', this.startGame, this, 0, 1);
+            startButton.scale.set(0.5, 0.5);
+            startButton.anchor.set(0.5, 0);
+        }
+
+        startGame() {
+            this.game.state.start("PlayingState", true, true);
         }
     }
 
@@ -488,7 +518,9 @@ module KetchupAndRaisins {
             "Eat food or you'll become food.",
             "Remember the times when you felt kawaii and then remember how kawaii it made you feel.",
             "Omae wa mou shindeiru...",
-            "Focus, baka!"
+            "Focus, baka!",
+            "Oh dear, I'm quite certain that you're a kind person!",
+            "My name's Kawaii-chan."
         ];
 
         constructor() {
@@ -579,6 +611,7 @@ module KetchupAndRaisins {
              * while the preloader will display the loading screen and load assets and then start the main game state.
              */
             this.game.state.add("BootState", BootState, true);
+            this.game.state.add("MainMenuState", MainMenuState);
             this.game.state.add("PreloadState", PreloadState);
             this.game.state.add("PlayingState", PlayingState);
             this.game.state.add("LosingState", LosingState);
