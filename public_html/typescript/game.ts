@@ -149,12 +149,20 @@ module KetchupAndRaisins {
 
         preload() {
             this.game.load.spritesheet('startButton', 'assets/startButton.png', 640, 400);
+            this.game.load.image('twitter', 'assets/twitter share.png');
         }
 
         create() {
             let startButton = this.game.add.button(this.game.world.centerX, 100, 'startButton', this.startGame, this, 0, 1);
             startButton.scale.set(0.5, 0.5);
             startButton.anchor.set(0.5, 0);
+
+            let twitterShare = this.game.add.button(this.game.world.centerX / 3, this.game.world.centerY, 'twitter', () => {
+                window.open("https://twitter.com/webDva");
+            }, this);
+            twitterShare.scale.set(0.3, 0.3);
+            twitterShare.anchor.set(0.5, 0.5);
+            twitterShare.angle = -45;
         }
 
         startGame() {
