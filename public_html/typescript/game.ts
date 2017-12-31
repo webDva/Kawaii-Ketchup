@@ -144,7 +144,7 @@ module KetchupAndRaisins {
         }
 
         init() {
-
+            this.game.stage.backgroundColor = "#000000";
         }
 
         preload() {
@@ -543,6 +543,7 @@ module KetchupAndRaisins {
         preload() {
             this.game.load.image('kawaii', 'assets/kawaiichan.png');
             this.game.load.spritesheet('restartButton', 'assets/retryButton.png', 640, 400);
+            this.game.load.spritesheet('quitButton', 'assets/quitButton.png', 640, 400);
 
             this.game.load.audio('lose_music', 'assets/lose_song.wav');
         }
@@ -597,6 +598,12 @@ module KetchupAndRaisins {
             }, this, 1, 0);
             retryButton.scale.set(0.3, 0.3);
             retryButton.anchor.set(1, 1);
+
+            let quitButton = this.game.add.button(this.game.world.centerX + 10, this.game.world.height - 10, 'quitButton', () => {
+                this.game.state.start("MainMenuState", true, true);
+            }, this, 0, 1);
+            quitButton.scale.set(0.3, 0.3);
+            quitButton.anchor.set(0, 1);
         }
 
         update() {
