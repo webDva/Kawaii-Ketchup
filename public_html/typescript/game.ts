@@ -542,6 +542,7 @@ module KetchupAndRaisins {
 
         preload() {
             this.game.load.image('kawaii', 'assets/kawaiichan.png');
+            this.game.load.spritesheet('restartButton', 'assets/retryButton.png', 640, 400);
 
             this.game.load.audio('lose_music', 'assets/lose_song.wav');
         }
@@ -591,17 +592,11 @@ module KetchupAndRaisins {
                 totalTime += 150;
             }
 
-            let restartButton = this.game.add.text(this.game.world.centerX, this.game.world.height - 10, "Restart",
-                {
-                    font: "6em 'Segoe UI', Impact, sans-serif",
-                    fill: "#ffffff",
-                    align: "center"
-                });
-            restartButton.anchor.setTo(0.5, 1);
-            restartButton.inputEnabled = true;
-            restartButton.events.onInputDown.add(() => {
+            let retryButton = this.game.add.button(this.game.world.centerX, this.game.world.height - 10, 'restartButton', () => {
                 this.game.state.start("PlayingState", true, true);
-            }, this);
+            }, this, 1, 0);
+            retryButton.scale.set(0.3, 0.3);
+            retryButton.anchor.set(1, 1);
         }
 
         update() {
