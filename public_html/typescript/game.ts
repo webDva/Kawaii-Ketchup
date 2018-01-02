@@ -145,7 +145,7 @@ module KetchupAndRaisins {
         }
 
         init() {
-            this.game.stage.backgroundColor = "#000000";
+            this.game.stage.backgroundColor = "#521529";
         }
 
         preload() {
@@ -172,6 +172,7 @@ module KetchupAndRaisins {
             }, this);
 
             this.backgroundTile = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'happyKetchup');
+            this.game.add.tween(this.backgroundTile.tileScale).to({x: 0.96, y: 0.96}, 2102, null, true, 0, -1, true);
 
             let startButton = this.game.add.button(this.game.world.centerX, 100, 'startButton', this.startGame, this, 0, 1);
             startButton.scale.set(0.5, 0.5);
@@ -227,7 +228,7 @@ module KetchupAndRaisins {
 
             this.attributionText = this.game.add.text(
                 this.game.world.centerX,
-                this.game.world.centerY, '"Fizzlepop" by BeauXuan\nhttps://www.newgrounds.com/audio/listen/768985\nhttps://creativecommons.org/licenses/by-sa/3.0/', {
+                this.game.world.centerY, '"Fizzlepop" by Beau Xuan\nhttps://www.newgrounds.com/audio/listen/768985\nhttps://creativecommons.org/licenses/by-sa/3.0/', {
                     font: '3em sans-serif',
                     fill: '#ffffff',
                     align: 'center'
