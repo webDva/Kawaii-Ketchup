@@ -149,13 +149,26 @@ module KetchupAndRaisins {
 
         preload() {
             this.game.load.spritesheet('startButton', 'assets/startButton.png', 640, 400);
+            this.game.load.spritesheet('creditsButton', 'assets/creditsButton.png', 640, 400);
             this.game.load.image('twitter', 'assets/twitter share.png');
+
+            let buttonBackgroundOut = this.game.add.bitmapData(640, 400);
+            buttonBackgroundOut.rect(0, 0, 640, 400, 'rgb(0, 0, 0, 0)');
+            this.game.cache.addBitmapData('buttonBackgroundOut', buttonBackgroundOut);
+
+            let buttonBackgroundOver = this.game.add.bitmapData(64, 64);
+            buttonBackgroundOver.rect(0, 0, 64, 64, 'rgb(66, 134, 244)');
+            this.game.cache.addBitmapData('buttonBackgroundOver', buttonBackgroundOver);
         }
 
         create() {
             let startButton = this.game.add.button(this.game.world.centerX, 100, 'startButton', this.startGame, this, 0, 1);
             startButton.scale.set(0.5, 0.5);
             startButton.anchor.set(0.5, 0);
+
+            let creditsButton = this.game.add.button(this.game.world.centerX, startButton.bottom + 10, 'creditsButton', this.showCredits, this, 1, 0);
+            creditsButton.scale.set(0.5, 0.5);
+            creditsButton.anchor.set(0.5, 0);
 
             let twitterShare = this.game.add.button(this.game.world.centerX / 3, this.game.world.centerY, 'twitter', () => {
                 window.open("https://twitter.com/webDva");
@@ -167,6 +180,54 @@ module KetchupAndRaisins {
 
         startGame() {
             this.game.state.start("PlayingState", true, true);
+        }
+
+        showCredits() {
+            this.game.state.start("CreditsState", true, true);
+        }
+    }
+
+    /*
+     * Credits
+     */
+    export class CreditsState extends Phaser.State {
+
+        backText: Phaser.Text;
+        attributionText: Phaser.Text;
+
+        constructor() {
+            super();
+        }
+        init() {}
+        preload() {
+
+        }
+        create() {
+            this.attributionText = this.game.add.text(
+                this.game.world.centerX,
+                this.game.world.centerY, '"Fizzlepop" by BeauXuan\nhttps://www.newgrounds.com/audio/listen/768985\nhttps://creativecommons.org/licenses/by-sa/3.0/', {
+                    font: '3em sans-serif',
+                    fill: '#ffffff',
+                    align: 'center'
+                }
+            );
+            this.attributionText.anchor.setTo(0.5, 0.5);
+
+            this.backText = this.game.add.text(
+                this.game.world.centerX,
+                this.game.height - 20,
+                "Return to main menu", {
+                    font: '4em Impact',
+                    fill: '#ffffff',
+                    align: 'center'
+                }
+            );
+            this.backText.anchor.setTo(0.5, 1);
+            this.backText.inputEnabled = true;
+            this.backText.events.onInputDown.add(() => {
+                this.game.state.start("MainMenuState", true, true);
+            }, this);
+
         }
     }
 
@@ -622,6 +683,7 @@ module KetchupAndRaisins {
              */
             this.game.state.add("BootState", BootState, true);
             this.game.state.add("MainMenuState", MainMenuState);
+            this.game.state.add("CreditsState", CreditsState);
             this.game.state.add("PreloadState", PreloadState);
             this.game.state.add("PlayingState", PlayingState);
             this.game.state.add("LosingState", LosingState);
