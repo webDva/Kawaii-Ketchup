@@ -137,7 +137,8 @@ module KetchupAndRaisins {
      */
     export class MainMenuState extends Phaser.State {
 
-
+        music: Phaser.Sound;
+        backgroundTile: Phaser.TileSprite;
 
         constructor() {
             super();
@@ -151,6 +152,9 @@ module KetchupAndRaisins {
             this.game.load.spritesheet('startButton', 'assets/startButton.png', 640, 400);
             this.game.load.spritesheet('creditsButton', 'assets/creditsButton.png', 640, 400);
             this.game.load.image('twitter', 'assets/twitter share.png');
+            this.game.load.image('happyKetchup', 'assets/happyKetchup.png');
+
+            this.game.load.audio('fizzlepop', 'assets/Fizzlepop.mp3');
 
             let buttonBackgroundOut = this.game.add.bitmapData(640, 400);
             buttonBackgroundOut.rect(0, 0, 640, 400, 'rgb(0, 0, 0, 0)');
@@ -162,6 +166,13 @@ module KetchupAndRaisins {
         }
 
         create() {
+            this.music = this.game.add.audio('fizzlepop');
+            this.music.onDecoded.add(() => {
+                this.music.fadeIn(8000, true);
+            }, this);
+
+            this.backgroundTile = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'happyKetchup');
+
             let startButton = this.game.add.button(this.game.world.centerX, 100, 'startButton', this.startGame, this, 0, 1);
             startButton.scale.set(0.5, 0.5);
             startButton.anchor.set(0.5, 0);
@@ -176,6 +187,11 @@ module KetchupAndRaisins {
             twitterShare.scale.set(0.3, 0.3);
             twitterShare.anchor.set(0.5, 0.5);
             twitterShare.angle = -45;
+        }
+
+        update() {
+            this.backgroundTile.tilePosition.x += -1;
+            this.backgroundTile.tilePosition.y += -1;
         }
 
         startGame() {
@@ -194,15 +210,21 @@ module KetchupAndRaisins {
 
         backText: Phaser.Text;
         attributionText: Phaser.Text;
+        quietMusic: Phaser.Sound;
 
         constructor() {
             super();
         }
         init() {}
         preload() {
-
+            this.game.load.audio('fizzlepop', 'assets/Fizzlepop.mp3');
         }
         create() {
+            this.quietMusic = this.game.add.audio('fizzlepop');
+            this.quietMusic.onDecoded.add(() => {
+                this.quietMusic.play('', 0, 0.3, true);
+            }, this);
+
             this.attributionText = this.game.add.text(
                 this.game.world.centerX,
                 this.game.world.centerY, '"Fizzlepop" by BeauXuan\nhttps://www.newgrounds.com/audio/listen/768985\nhttps://creativecommons.org/licenses/by-sa/3.0/', {
