@@ -171,6 +171,26 @@ module KetchupAndRaisins {
                 this.music.fadeIn(8000, true);
             }, this);
 
+            let upKey = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
+            upKey.onDown.add(() => {
+                currentSelection.frame ^= 1; // xor toggle
+                currentSelection = selectionGroup.next();
+                currentSelection.frame ^= 1;
+            }, this);
+
+            let downKey = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+            downKey.onDown.add(() => {
+                currentSelection.frame ^= 1;
+                currentSelection = selectionGroup.next();
+                currentSelection.frame ^= 1;
+            }, this);
+
+            let enterKey = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+            enterKey.onDown.add(() => {
+                if (currentSelection.key === 'startButton') this.startGame();
+                else if (currentSelection.key === 'creditsButton') this.showCredits();
+            }, this);
+
             this.backgroundTile = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'happyKetchup');
             this.game.add.tween(this.backgroundTile.tileScale).to({x: 0.96, y: 0.96}, 2102, null, true, 0, -1, true);
 
@@ -188,6 +208,12 @@ module KetchupAndRaisins {
             twitterShare.scale.set(0.3, 0.3);
             twitterShare.anchor.set(0.5, 0.5);
             twitterShare.angle = -45;
+
+            let selectionGroup = this.game.add.group();
+            selectionGroup.addMultiple([startButton, creditsButton]);
+
+            let currentSelection = selectionGroup.getFirstAlive();
+            currentSelection.frame = 0;
         }
 
         update() {
