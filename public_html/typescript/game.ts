@@ -277,6 +277,10 @@ module KetchupAndRaisins {
                 this.game.state.start("MainMenuState", true, true);
             }, this);
 
+            let enterKey = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+            enterKey.onDown.add(() => {
+                this.game.state.start("MainMenuState", true, true);
+            }, this);
         }
     }
 
@@ -714,6 +718,32 @@ module KetchupAndRaisins {
             }, this, 0, 1);
             quitButton.scale.set(0.3, 0.3);
             quitButton.anchor.set(0, 1);
+
+            let leftKey = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+            leftKey.onDown.add(() => {
+                currentSelection.frame ^= 1; // xor toggle
+                currentSelection = selectionGroup.next();
+                currentSelection.frame ^= 1;
+            }, this);
+
+            let rightKey = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+            rightKey.onDown.add(() => {
+                currentSelection.frame ^= 1;
+                currentSelection = selectionGroup.next();
+                currentSelection.frame ^= 1;
+            }, this);
+
+            let enterKey = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+            enterKey.onDown.add(() => {
+                if (currentSelection.key === 'restartButton') this.game.state.start("PlayingState", true, true);
+                else if (currentSelection.key === 'quitButton') this.game.state.start("MainMenuState", true, true);
+            }, this);
+
+            let selectionGroup = this.game.add.group();
+            selectionGroup.addMultiple([retryButton, quitButton]);
+
+            let currentSelection = selectionGroup.getFirstAlive();
+            currentSelection.frame = 1;
         }
 
         update() {
