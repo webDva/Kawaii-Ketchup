@@ -303,6 +303,7 @@ module KetchupAndRaisins {
 
         // keyboard cursor key controls
         cursorKeys: Phaser.CursorKeys;
+        wasdKeys: any;
 
         // onscreen controls sprites
         aButton: Phaser.Button;
@@ -390,6 +391,9 @@ module KetchupAndRaisins {
 
             // add cursor keys controls
             this.cursorKeys = this.game.input.keyboard.createCursorKeys();
+
+            // add WASD controls
+            this.wasdKeys = this.game.input.keyboard.addKeys({'up': Phaser.KeyCode.W, 'down': Phaser.KeyCode.S, 'left': Phaser.KeyCode.A, 'right': Phaser.KeyCode.D});
 
             // Add and configure the player sprite.
             this.player = this.game.add.sprite(100, this.game.world.centerY, 'player_spritesheet', 0);
@@ -602,15 +606,15 @@ module KetchupAndRaisins {
             this.player.body.velocity.x = 0;
 
             // processing cursor keys or onscreen controls input to move the player avatar
-            if (this.cursorKeys.left.isDown || this.isLeftButtonPressed) {
+            if (this.cursorKeys.left.isDown || this.wasdKeys.left.isDown || this.isLeftButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Left);
             }
-            else if (this.cursorKeys.right.isDown || this.isRightButtonPressed) {
+            else if (this.cursorKeys.right.isDown || this.wasdKeys.right.isDown || this.isRightButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Right);
             }
-            if (this.cursorKeys.up.isDown || this.isAButtonPressed) {
+            if (this.cursorKeys.up.isDown || this.wasdKeys.up.isDown || this.isAButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Up);
-            } else if (this.cursorKeys.down.isDown || this.isBButtonPressed) {
+            } else if (this.cursorKeys.down.isDown || this.wasdKeys.down.isDown || this.isBButtonPressed) {
                 this.movePlayer(KetchupAndRaisins.Movement.Down);
             }
 
