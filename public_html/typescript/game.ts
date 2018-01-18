@@ -1,7 +1,4 @@
-/*
- * Template
- */
-module KetchupAndRaisins {
+module KawaiiKetchup {
     /*
      * Boot state for only loading the loading screen
      */
@@ -154,7 +151,7 @@ module KetchupAndRaisins {
             this.game.load.image('twitter', 'assets/twitter share.png');
             this.game.load.image('happyKetchup', 'assets/happyKetchup.png');
 
-            this.game.load.audio('fizzlepop', 'assets/Fizzlepop.mp3');
+            this.game.load.audio('newsong', 'assets/Menu_3_mp3.mp3');
 
             let buttonBackgroundOut = this.game.add.bitmapData(640, 400);
             buttonBackgroundOut.rect(0, 0, 640, 400, 'rgb(0, 0, 0, 0)');
@@ -166,9 +163,9 @@ module KetchupAndRaisins {
         }
 
         create() {
-            this.music = this.game.add.audio('fizzlepop');
+            this.music = this.game.add.audio('newsong');
             this.music.onDecoded.add(() => {
-                this.music.fadeIn(8000, true);
+                this.music.fadeIn(10500, true);
             }, this);
 
             let upKey = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -244,17 +241,17 @@ module KetchupAndRaisins {
         }
         init() {}
         preload() {
-            this.game.load.audio('fizzlepop', 'assets/Fizzlepop.mp3');
+            this.game.load.audio('newsong', 'assets/Menu_3_mp3.mp3');
         }
         create() {
-            this.quietMusic = this.game.add.audio('fizzlepop');
+            this.quietMusic = this.game.add.audio('newsong');
             this.quietMusic.onDecoded.add(() => {
                 this.quietMusic.play('', 0, 0.3, true);
             }, this);
 
             this.attributionText = this.game.add.text(
                 this.game.world.centerX,
-                this.game.world.centerY, '"Fizzlepop" by Beau Xuan\nhttps://www.newgrounds.com/audio/listen/768985\nhttps://creativecommons.org/licenses/by-sa/3.0/', {
+                this.game.world.centerY, 'Music by Final Gate Studios\nhttps://finalgatestudios.itch.io/music-pack-1', {
                     font: '3em sans-serif',
                     fill: '#ffffff',
                     align: 'center'
@@ -322,6 +319,8 @@ module KetchupAndRaisins {
         collectRaisinSound: Phaser.Sound;
         ketchupHitSound: Phaser.Sound;
 
+        loopMusic: Phaser.Sound;
+
         // A bunch of constant values.
 
         static MOVEMENT_SPEED: number = 365;
@@ -379,9 +378,17 @@ module KetchupAndRaisins {
 
             this.game.load.audio("raisinCollectSound", "assets/raisinCollect.wav");
             this.game.load.audio('ketchupHitSound', 'assets/ketchupHit.wav');
+
+            this.game.load.audio('playingMusic', 'assets/Menu_2_mp3.mp3');
         }
 
         create() {
+            this.loopMusic = this.game.add.audio('playingMusic');
+            this.loopMusic.onDecoded.add(() => {
+                this.loopMusic.fadeIn(15000, true);
+                this.loopMusic.volume = 0.3;
+            }, this);
+
             // Start the arcade physics system
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -517,25 +524,25 @@ module KetchupAndRaisins {
         /*
          * controls player movement
          */
-        movePlayer(direction: KetchupAndRaisins.Movement) {
+        movePlayer(direction: KawaiiKetchup.Movement) {
             // If the player is in mid-air, decrease their movement speed by 10%.
             let speedModifier = 0;
             if (!this.player.body.onFloor()) {
                 speedModifier = 0.10 * PlayingState.MOVEMENT_SPEED;
             }
 
-            if (direction === KetchupAndRaisins.Movement.Left) {
+            if (direction === KawaiiKetchup.Movement.Left) {
                 this.player.body.velocity.x = -PlayingState.MOVEMENT_SPEED - speedModifier;
                 this.player.animations.play('runLeft');
-            } else if (direction === KetchupAndRaisins.Movement.Right) {
+            } else if (direction === KawaiiKetchup.Movement.Right) {
                 this.player.body.velocity.x = PlayingState.MOVEMENT_SPEED - speedModifier;
                 this.player.animations.play('runRight');
-            } else if (direction === KetchupAndRaisins.Movement.Up) {
+            } else if (direction === KawaiiKetchup.Movement.Up) {
                 // checks to see if the player is on the ground, then jumps and plays jumping sound
                 if (this.player.body.onFloor()) {
                     this.player.body.velocity.y = -PlayingState.JUMPING_SPEED;
                 }
-            } else if (direction === KetchupAndRaisins.Movement.Down) {
+            } else if (direction === KawaiiKetchup.Movement.Down) {
                 this.player.body.velocity.y = PlayingState.MOVEMENT_SPEED;
             }
         }
@@ -607,15 +614,15 @@ module KetchupAndRaisins {
 
             // processing cursor keys or onscreen controls input to move the player avatar
             if (this.cursorKeys.left.isDown || this.wasdKeys.left.isDown || this.isLeftButtonPressed) {
-                this.movePlayer(KetchupAndRaisins.Movement.Left);
+                this.movePlayer(KawaiiKetchup.Movement.Left);
             }
             else if (this.cursorKeys.right.isDown || this.wasdKeys.right.isDown || this.isRightButtonPressed) {
-                this.movePlayer(KetchupAndRaisins.Movement.Right);
+                this.movePlayer(KawaiiKetchup.Movement.Right);
             }
             if (this.cursorKeys.up.isDown || this.wasdKeys.up.isDown || this.isAButtonPressed) {
-                this.movePlayer(KetchupAndRaisins.Movement.Up);
+                this.movePlayer(KawaiiKetchup.Movement.Up);
             } else if (this.cursorKeys.down.isDown || this.wasdKeys.down.isDown || this.isBButtonPressed) {
-                this.movePlayer(KetchupAndRaisins.Movement.Down);
+                this.movePlayer(KawaiiKetchup.Movement.Down);
             }
 
             this.drawHealthBar(); // Have to continously redraw the health bar like this.
@@ -663,7 +670,7 @@ module KetchupAndRaisins {
             this.game.load.spritesheet('restartButton', 'assets/retryButton.png', 640, 400);
             this.game.load.spritesheet('quitButton', 'assets/quitButton.png', 640, 400);
 
-            this.game.load.audio('lose_music', 'assets/lose_song.wav');
+            this.game.load.audio('lose_music', "assets/A Cop's Death_mp3.mp3");
         }
 
         create() {
@@ -776,5 +783,5 @@ module KetchupAndRaisins {
 
 // Kinda like starting the game.
 window.onload = () => {
-    let game = new KetchupAndRaisins.Game();
+    let game = new KawaiiKetchup.Game();
 };
