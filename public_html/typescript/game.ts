@@ -387,7 +387,7 @@ module KawaiiKetchup {
         create() {
             this.loopMusic = this.game.add.audio('playingMusic');
             this.loopMusic.onDecoded.add(() => {
-                this.loopMusic.fadeIn(15000, true);
+                this.loopMusic.fadeIn(30000, true);
                 this.loopMusic.volume = 0.3;
             }, this);
 
