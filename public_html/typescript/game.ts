@@ -337,8 +337,8 @@ module KawaiiKetchup {
 
         static RAISIN_POINT_VALUE: number = 10; // How much collecting an individual raisin is worth.
         static HEAL_AMOUNT: number = 1; // Determines how much to increase the player's health by when a raisin is collected.
-        static HEALTH_DECREASE_TIME: number = 1800; // Number of milliseconds for how often to decrease the player's health.
-        static HEALTH_DECREASE_AMOUNT: number = 1; // How much health to decrease per tick.
+        static HEALTH_DECREASE_TIME: number = 100; // Number of milliseconds for how often to decrease the player's health.
+        static HEALTH_DECREASE_AMOUNT: number = 0.03; // How much health to decrease per tick.
 
         static HEALTHBAR_COLOR: number = 0xC70039;
         static SCORE_TEXT_COLOR: string = "#004401";
