@@ -109,7 +109,7 @@ module KawaiiKetchup {
             this.scale.setTo(0.01, 0.01); // then set its size to zero
 
             // An animation tween for creating an explosion effect. When done animating, kills the ketchup sprite.
-            let tween = this.game.add.tween(this.scale).to({x: 1, y: 1}, 300, "Linear", true);
+            let tween = this.game.add.tween(this.scale).to({ x: 1, y: 1 }, 300, "Linear", true);
             tween.onComplete.add(() => {
                 this.kill();
             }, this);
@@ -189,7 +189,7 @@ module KawaiiKetchup {
             }, this);
 
             this.backgroundTile = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'happyKetchup');
-            this.game.add.tween(this.backgroundTile.tileScale).to({x: 0.96, y: 0.96}, 2102, null, true, 0, -1, true);
+            this.game.add.tween(this.backgroundTile.tileScale).to({ x: 0.96, y: 0.96 }, 2102, null, true, 0, -1, true);
 
             let startButton = this.game.add.button(this.game.world.centerX, 100, 'startButton', this.startGame, this, 0, 1);
             startButton.scale.set(0.5, 0.5);
@@ -239,7 +239,7 @@ module KawaiiKetchup {
         constructor() {
             super();
         }
-        init() {}
+        init() { }
         preload() {
             this.game.load.audio('newsong', 'assets/Menu_3_mp3.mp3');
         }
@@ -321,6 +321,8 @@ module KawaiiKetchup {
 
         loopMusic: Phaser.Sound;
 
+        spawnEpisode: number = 0;
+
         // A bunch of constant values.
 
         static MOVEMENT_SPEED: number = 365;
@@ -400,7 +402,7 @@ module KawaiiKetchup {
             this.cursorKeys = this.game.input.keyboard.createCursorKeys();
 
             // add WASD controls
-            this.wasdKeys = this.game.input.keyboard.addKeys({'up': Phaser.KeyCode.W, 'down': Phaser.KeyCode.S, 'left': Phaser.KeyCode.A, 'right': Phaser.KeyCode.D});
+            this.wasdKeys = this.game.input.keyboard.addKeys({ 'up': Phaser.KeyCode.W, 'down': Phaser.KeyCode.S, 'left': Phaser.KeyCode.A, 'right': Phaser.KeyCode.D });
 
             // Add and configure the player sprite.
             this.player = this.game.add.sprite(100, this.game.world.centerY, 'player_spritesheet', 0);
@@ -431,11 +433,28 @@ module KawaiiKetchup {
             // A spawn timer for creating ketchup bottles.
             let ketchupSpawnTimer = this.game.time.create();
             ketchupSpawnTimer.loop(PlayingState.KETCHUP_SPAWN_RATE, () => {
-                let singleKetchup: KetchupSprite = this.ketchupGroup.add(
-                    new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
-                );
-                // Feed the new ketchup bottle information from this game state.
-                singleKetchup.initialize(this.player);
+
+                let spawnRate: number;
+                let maximumSpawnRate: number = 90;
+                let growthRate: number = 0.3;
+                let logThreshold: number = 15;
+                let bias: number = 2.5;
+
+                if (this.spawnEpisode < maximumSpawnRate)
+                    this.spawnEpisode += growthRate;
+
+                if (this.spawnEpisode < logThreshold)
+                    spawnRate = Math.log(this.spawnEpisode);
+                else if (this.spawnEpisode >= logThreshold)
+                    spawnRate = this.spawnEpisode - Math.log(this.spawnEpisode * 2);
+
+                if (Phaser.Utils.chanceRoll(bias + spawnRate)) {
+                    let singleKetchup: KetchupSprite = this.ketchupGroup.add(
+                        new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
+                    );
+                    // Feed the new ketchup bottle information from this game state.
+                    singleKetchup.initialize(this.player);
+                }
             }, this);
 
             this.textScore = this.game.add.text(0, 50, "", {
@@ -574,8 +593,8 @@ module KawaiiKetchup {
             );
 
             // tweens for fading and transforming text pop up
-            this.game.add.tween(text).to({y: text.y - 50}, 500, null, true);
-            let secondTween = this.game.add.tween(text).to({alpha: 0}, 500, null, true);
+            this.game.add.tween(text).to({ y: text.y - 50 }, 500, null, true);
+            let secondTween = this.game.add.tween(text).to({ alpha: 0 }, 500, null, true);
             secondTween.onComplete.add(() => {
                 text.kill();
             }, this);
