@@ -601,7 +601,7 @@ module KawaiiKetchup {
 
             food.kill(); // Remove the food when it's been collected.
             this.score += PlayingState.RAISIN_POINT_VALUE; // Increment the score by a raisin point value.
-            if (this.currentHealth < PlayingState.INITIAL_HEALTH) { // Increase the player's health, but only if they already aren't at full health.
+            if (this.currentHealth < PlayingState.INITIAL_HEALTH - PlayingState.HEAL_AMOUNT) { // Increase the player's health, but only if they already aren't at full health.
                 this.currentHealth += PlayingState.HEAL_AMOUNT;
             }
 
