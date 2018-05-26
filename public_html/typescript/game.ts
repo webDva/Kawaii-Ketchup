@@ -434,21 +434,13 @@ module KawaiiKetchup {
             let ketchupSpawnTimer = this.game.time.create();
             ketchupSpawnTimer.loop(PlayingState.KETCHUP_SPAWN_RATE, () => {
 
-                let spawnRate: number;
-                let maximumSpawnRate: number = 90;
-                let growthRate: number = 0.3;
-                let logThreshold: number = 15;
-                let bias: number = 2.5;
+                const maximumSpawnRate: number = 96;
+                const gamma: number = 0.6
 
-                if (this.spawnEpisode < maximumSpawnRate)
-                    this.spawnEpisode += growthRate;
+                if (this.spawnEpisode * gamma < maximumSpawnRate)
+                    this.spawnEpisode++;
 
-                if (this.spawnEpisode < logThreshold)
-                    spawnRate = Math.log(this.spawnEpisode);
-                else if (this.spawnEpisode >= logThreshold)
-                    spawnRate = this.spawnEpisode - Math.log(this.spawnEpisode * 2);
-
-                if (Phaser.Utils.chanceRoll(bias + spawnRate)) {
+                if (Phaser.Utils.chanceRoll(this.spawnEpisode * gamma)) {
                     let singleKetchup: KetchupSprite = this.ketchupGroup.add(
                         new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
                     );
