@@ -53,56 +53,30 @@ module KawaiiKetchup {
      * Derived KetchupSprite class for handling ketchup bottle properties.
      */
     export class KetchupSprite extends Phaser.Sprite {
-
-        targetToFollow: Phaser.Sprite; // Will be following the player sprite.
-        attackTimer: Phaser.Timer; // Looped timer for attacking the player.
-
         constructor(game: Phaser.Game, x: number, y: number, key: string) {
             super(game, x, y, key);
 
             this.scale.setTo(0.3, 0.3);
             this.game.physics.arcade.enable(this);
-            this.checkWorldBounds = true;
-            this.outOfBoundsKill = true;
+            this.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_COMPONENT);
             this.anchor.setTo(0.5, 0.5); // Set the center of the ketchup bottles.
 
             // Timers for ketchup actions.
-
-            this.attackTimer = this.game.time.create();
-            this.attackTimer.loop(900, () => {
-                // Get the angle between the ketchup bottle and the player.
-                let angle = Phaser.Math.angleBetweenPoints(this.position, this.targetToFollow.position);
-
-                // Veer toward the player.
-                this.body.velocity.x = Math.cos(angle) * 200;
-                this.body.velocity.y = Math.sin(angle) * 200;
-            }, this);
 
             // TTL timer.
             let TTLTimer = this.game.time.create();
             TTLTimer.add(PlayingState.KETCHUP_TTL, this.explode, this);
 
             // Start the timers
-            this.attackTimer.start(PlayingState.KETCHUP_BEGIN_ATTACK_TIME); // A delay
             TTLTimer.start();
 
             // Add to the display, but the physics system already did this, so this is redundant.
             this.game.stage.addChild(this);
         }
 
-        /*
-         * Initialize or feed the ketchup bottle with information from the game state, such as the player sprite.
-         */
-        initialize(player: Phaser.Sprite) {
-            this.targetToFollow = player;
-        }
-
         explode() {
             // Disable the ketchup bottle's physics body so that it will no longer collide as it's now exploding and dying.
             this.body.enable = false;
-
-            // Stop the attack timer.
-            this.attackTimer.stop();
 
             // Change the texture of the ketchup bottle to an explosion.
             this.loadTexture('explosion');
@@ -442,10 +416,8 @@ module KawaiiKetchup {
 
                 if (Phaser.Utils.chanceRoll(this.spawnEpisode * gamma)) {
                     let singleKetchup: KetchupSprite = this.ketchupGroup.add(
-                        new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), this.game.rnd.integerInRange(0, 150), 'ketchup')
+                        new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), 0, 'ketchup')
                     );
-                    // Feed the new ketchup bottle information from this game state.
-                    singleKetchup.initialize(this.player);
                 }
             }, this);
 
