@@ -295,7 +295,7 @@ module KawaiiKetchup {
 
         loopMusic: Phaser.Sound;
 
-        spawnEpisode: number = 0;
+        spawnEpisode: number;
 
         // A bunch of constant values.
 
@@ -330,6 +330,7 @@ module KawaiiKetchup {
             this.score = 0;
             this.currentHealth = PlayingState.INITIAL_HEALTH
             this.foodSpritesCollected = 0;
+            this.spawnEpisode = 0;
 
             this.game.stage.backgroundColor = "#7691D8";
         }
