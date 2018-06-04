@@ -95,11 +95,16 @@ module KawaiiKetchup {
             super(game, x, y, key);
 
             this.game.physics.arcade.enable(this);
+            this.body.gravity = new Phaser.Point(-this.game.physics.arcade.gravity.x, PlayingState.GRAVITY_Y_COMPONENT * 1.65);
 
             // Good size!
             this.scale.setTo(0.5, 0.5);
 
             this.game.stage.addChild(this);
+
+            let TTLTimer = this.game.time.create();
+            TTLTimer.add(PlayingState.KETCHUP_TTL, () => this.kill(), this);
+            TTLTimer.start();
         }
     }
 
@@ -417,7 +422,7 @@ module KawaiiKetchup {
 
                 if (Phaser.Utils.chanceRoll(this.spawnEpisode * gamma)) {
                     let singleKetchup: KetchupSprite = this.ketchupGroup.add(
-                        new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), 0, 'ketchup')
+                        new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), -50, 'ketchup')
                     );
                 }
             }, this);
@@ -432,7 +437,7 @@ module KawaiiKetchup {
             // Responsible for creating new collectibles.
             let foodSpawnTimer = this.game.time.create();
             foodSpawnTimer.loop(1500, () => {
-                let aFoodSprite = new RaisinSprite(this.game, this.game.rnd.integerInRange(0, this.game.width - 24), this.game.rnd.integerInRange(this.game.world.centerY - 64, this.game.world.height - 24), 'raisin');
+                let aFoodSprite = new RaisinSprite(this.game, this.game.rnd.integerInRange(0, this.game.width - 24), -50, 'raisin');
                 this.foodCollectibleGroup.add(aFoodSprite);
             }, this);
 
