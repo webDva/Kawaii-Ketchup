@@ -497,8 +497,8 @@ module KawaiiKetchup {
 
             // Responsible for calculating the player's score.
             let calculateScoreTimer = this.game.time.create();
-            calculateScoreTimer.loop(900, () => {
-                this.score += 80;
+            calculateScoreTimer.loop(500, () => {
+                this.score += 1;
             }, this);
 
             // Start all the timers.
