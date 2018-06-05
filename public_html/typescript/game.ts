@@ -643,7 +643,6 @@ module KawaiiKetchup {
             "Omae wa mou shindeiru...",
             "Focus, baka!",
             "Oh dear, I'm quite certain that you're a kind person!",
-            "My name's Kawaii-chan, the Soul of Waifu.",
             "You don't have to give up.",
             "Your feelings? You don't have to listen to them, y'know.",
             "Lifestyle is important. What is your lifestyle?"
