@@ -659,7 +659,6 @@ module KawaiiKetchup {
         }
 
         preload() {
-            this.game.load.image('kawaii', 'assets/kawaiichan.png');
             this.game.load.spritesheet('restartButton', 'assets/retryButton.png', 640, 400);
             this.game.load.spritesheet('quitButton', 'assets/quitButton.png', 640, 400);
 
@@ -673,13 +672,9 @@ module KawaiiKetchup {
             endMusic.loop = true;
             endMusic.play();
 
-            let kChanFace = this.game.add.sprite(this.game.world.centerX / 4, this.game.world.centerY, 'kawaii');
-            kChanFace.anchor.setTo(0.5, 0.5);
-            kChanFace.scale.setTo(0.5, 0.5);
-
             this.message = this.phrasesOfSoulOfWaifu[this.game.rnd.integerInRange(0, this.phrasesOfSoulOfWaifu.length - 1)];
 
-            this.text = this.game.add.text(186,
+            this.text = this.game.add.text(this.game.world.centerX,
                 this.game.world.centerY, '', {
                     font: '4em "Comic Sans MS"',
                     fontWeight: 'bold',
@@ -688,7 +683,7 @@ module KawaiiKetchup {
                     wordWrap: true,
                     wordWrapWidth: this.game.world.width - 186
                 });
-            this.text.anchor.setTo(0, 0.5);
+            this.text.anchor.setTo(0.5, 0.5);
 
             this.scoreText = this.game.add.text(
                 this.game.world.centerX,
