@@ -1,15 +1,7 @@
 {
-    "name": "Ketchup_and_Raisins",
+    "name": "kawaii-ketchup",
     "version": "1.0.0",
-    "keywords": [
-        "util",
-        "functional",
-        "server",
-        "client",
-        "browser"
-    ],
-    "author": "jeast",
-    "contributors": [],
+    "author": "webdva",
     "dependencies": {
         "phaser-ce": "^2.9.1"
     }
