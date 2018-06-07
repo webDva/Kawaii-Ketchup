@@ -753,8 +753,8 @@ module KawaiiKetchup {
         game: Phaser.Game;
 
         constructor() {
-            //this.game = new Phaser.Game(800, 600, Phaser.AUTO, "phaser"); // for .gif screenshots
-            this.game = new Phaser.Game("100%", "100%", Phaser.AUTO, "phaser");
+            this.game = new Phaser.Game(800, 600, Phaser.AUTO, "phaser"); // for .gif screenshots
+            //this.game = new Phaser.Game("100%", "100%", Phaser.AUTO, "phaser");
 
             /* The boot state will contain an init() for the scale manager and will load the loading screen,
              * while the preloader will display the loading screen and load assets and then start the main game state.
