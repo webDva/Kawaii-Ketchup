@@ -421,9 +421,8 @@ module KawaiiKetchup {
                     this.spawnEpisode++;
 
                 if (Phaser.Utils.chanceRoll(this.spawnEpisode * gamma)) {
-                    let singleKetchup: KetchupSprite = this.ketchupGroup.add(
-                        new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), -50, 'ketchup')
-                    );
+                    let singleKetchup = new KetchupSprite(this.game, this.game.rnd.integerInRange(0, this.game.width), -50, 'ketchup');
+                    this.ketchupGroup.add(singleKetchup);
                 }
             }, this);
 
