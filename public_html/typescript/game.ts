@@ -65,7 +65,7 @@ module KawaiiKetchup {
 
             // TTL timer.
             let TTLTimer = this.game.time.create();
-            TTLTimer.add(PlayingState.KETCHUP_TTL, this.explode, this);
+            TTLTimer.add(PlayingState.KETCHUP_TTL, () => this.destroy(), this);
 
             // Start the timers
             TTLTimer.start();
@@ -85,7 +85,7 @@ module KawaiiKetchup {
             // An animation tween for creating an explosion effect. When done animating, kills the ketchup sprite.
             let tween = this.game.add.tween(this.scale).to({ x: 1, y: 1 }, 300, "Linear", true);
             tween.onComplete.add(() => {
-                this.kill();
+                this.destroy();
             }, this);
         }
     }
@@ -103,7 +103,7 @@ module KawaiiKetchup {
             this.game.stage.addChild(this);
 
             let TTLTimer = this.game.time.create();
-            TTLTimer.add(PlayingState.KETCHUP_TTL, () => this.kill(), this);
+            TTLTimer.add(PlayingState.KETCHUP_TTL, () => this.destroy(), this);
             TTLTimer.start();
         }
     }
@@ -566,10 +566,10 @@ module KawaiiKetchup {
             this.game.add.tween(text).to({ y: text.y - 50 }, 500, null, true);
             let secondTween = this.game.add.tween(text).to({ alpha: 0 }, 500, null, true);
             secondTween.onComplete.add(() => {
-                text.kill();
+                text.destroy();
             }, this);
 
-            food.kill(); // Remove the food when it's been collected.
+            food.destroy(); // Remove the food when it's been collected.
             this.score += PlayingState.RAISIN_POINT_VALUE; // Increment the score by a raisin point value.
             if (this.currentHealth < PlayingState.INITIAL_HEALTH - PlayingState.HEAL_AMOUNT) { // Increase the player's health, but only if they already aren't at full health.
                 this.currentHealth += PlayingState.HEAL_AMOUNT;
