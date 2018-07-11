@@ -768,7 +768,4 @@ module KawaiiKetchup {
     }
 }
 
-// Kinda like starting the game.
-window.onload = () => {
-    let game = new KawaiiKetchup.Game();
-};
+const game = new KawaiiKetchup.Game();
