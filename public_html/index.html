@@ -184,6 +184,21 @@
             game.game.input.enabled = true;
         };
     </script>
+    <script>
+        window.onerror = function serverNotifier(error_message, file, lineno, colno, error) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://kawaii-notifications.herokuapp.com/notification', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+                '❗': 'Kawaii Ketchup',
+                'source': 'line: ' + lineno + ', col: ' + colno,
+                'error': error_message,
+                'file': file
+            }));
+
+            return false;
+        };
+    </script>    
 </body>
 
 </html>
